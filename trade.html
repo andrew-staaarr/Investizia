@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Trade • KBG Crypto</title>
+    <script>
+    // Protect all pages - redirect to login if not authenticated
+    if (!localStorage.getItem('currentUser')) {
+        window.location.href = 'index.html';
+    } else {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        // Optional: extra check (in case someone tampers with storage)
+        if (user.username !== "Rose2317") {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+
+    <style>
+        /* Hide page content until auth check is complete */
+        .app-container {
+            display: none;
+        }
+        
+        .loading-auth {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #0f172a;
+            color: #00d4aa;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+   
+</head>
+<body>
+    <div class="background-particles"></div>
+
+    <div class="app-container">
+        <!-- Premium Header -->
+        <header class="app-header premium-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="window.history.back()">←</button>
+            </div>
+            <div class="header-center">Trade</div>
+        </header>
+
+        <main class="trade-main">
+            <!-- Balance & VIP Status – Luxurious Card -->
+            <section class="trade-balance premium-card glass-glow">
+                <div class="balance-header">
+                    <div class="user-info">
+                        <span class="greeting">Welcome back,</span>
+                        <span class="username" id="username-display">Rose2317</span>
+                        <span class="vip-badge vip6 glowing-vip">VIP4</span>
+                    </div>
+                </div>
+
+                <div class="balance-display">
+                    <div class="label">Available Balance</div>
+                    <div class="big-balance gradient-text" id="balance-display">2,660,222.00 <span class="currency">USDT</span></div>
+                </div>
+
+                <div class="limits-row">
+                    <div class="limit-box">
+                        <div class="limit-label">Invested Amount (This Month)</div>
+                        <div class="limit-value">5,00,000 USDT</div>
+                    </div>
+                    <div class="limit-box">
+                        <div class="limit-label">Profit Rewarded (This Month)</div>
+                        <div class="limit-value">33,355.00 USDT</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Investment Plans – Premium Glass Panel -->
+            <section class="investment-plans premium-card glass-glow">
+                <div class="investment-header">
+                    <h2 class="gradient-title">Monthly Profit Investment Plans</h2>
+                    <p class="hero-subtitle">Choose your plan and start earning high returns today</p>
+                </div>
+
+                <div class="plans-grid">
+                    <!-- Plan 1 – Basic -->
+                    <div class="plan-card premium-plan">
+                        <div class="plan-badge">Basic Plan</div>
+                        <div class="plan-profit">
+                            <span class="profit-rate">8% Monthly</span>
+                            <span class="profit-desc">Stable growth for beginners</span>
+                        </div>
+                        <ul class="plan-benefits">
+                            <li><strong>Minimum:</strong> 1,000 USDT</li>
+                            <li><strong>Maximum:</strong> 10,000 USDT</li>
+                            <li><strong>Daily Withdrawal:</strong> Up to 500 USDT</li>
+                            <li><strong>Risk Level:</strong> Low</li>
+                            <li><strong>Support:</strong> Standard 24/7</li>
+                        </ul>
+                        <button class="btn-invest premium-btn" onclick="showExpiredPopup()">Invest Now</button>
+                    </div>
+
+                    <!-- Plan 2 – Pro -->
+                    <div class="plan-card premium-plan recommended">
+                        <div class="plan-badge recommended-badge">Pro Plan</div>
+                        <div class="plan-profit">
+                            <span class="profit-rate">15% Monthly</span>
+                            <span class="profit-desc">Balanced returns with advanced tools</span>
+                        </div>
+                        <ul class="plan-benefits">
+                            <li><strong>Minimum:</strong> 10,000 USDT</li>
+                            <li><strong>Maximum:</strong> 50,000 USDT</li>
+                            <li><strong>Daily Withdrawal:</strong> Up to 2,500 USDT</li>
+                            <li><strong>Risk Level:</strong> Medium</li>
+                            <li><strong>Support:</strong> Priority 24/7 + Analytics</li>
+                        </ul>
+                        <button class="btn-invest premium-btn" onclick="showExpiredPopup()">Invest Now</button>
+                    </div>
+
+                    <!-- Plan 3 – Elite -->
+                    <div class="plan-card premium-plan">
+                        <div class="plan-badge">Elite Plan</div>
+                        <div class="plan-profit">
+                            <span class="profit-rate">25% Monthly</span>
+                            <span class="profit-desc">High-yield for experienced investors</span>
+                        </div>
+                        <ul class="plan-benefits">
+                            <li><strong>Minimum:</strong> 50,000 USDT</li>
+                            <li><strong>Maximum:</strong> Unlimited</li>
+                            <li><strong>Daily Withdrawal:</strong> Up to 10,000 USDT</li>
+                            <li><strong>Risk Level:</strong> High</li>
+                            <li><strong>Support:</strong> VIP 24/7 + Personal Manager</li>
+                        </ul>
+                        <button class="btn-invest premium-btn" onclick="showExpiredPopup()">Invest Now</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expired Popup -->
+            <div id="expired-popup" class="modal-overlay" style="display: none;">
+                <div class="modal-content glass-glow">
+                    <button class="modal-close" onclick="closeExpiredPopup()">×</button>
+                    <h2 class="modal-title gradient-title">Plan Expired</h2>
+                    <p class="modal-message">Increase your plan first. Your current plan is expired.</p>
+                    <div class="modal-actions">
+                        <button class="btn-upgrade premium-btn" onclick="window.location.href='membership.html'">Upgrade Plan</button>
+                        <button class="btn-cancel" onclick="closeExpiredPopup()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <nav class="bottom-nav premium-nav">
+                <a href="home.html" class="nav-item">
+                    <span>Dashboard</span>
+                </a>
+                <a href="trade.html" class="nav-item active">
+                    <span>Trade</span>
+                </a>
+                <a href="transfer.html" class="nav-item">
+                    <span>Transfer</span>
+                </a>
+                <a href="account.html" class="nav-item">
+                    <span>Account</span>
+                </a>
+            </nav>
+        </main>
+    </div>
+
+    <script>
+        // Show Expired Popup
+        function showExpiredPopup() {
+            document.getElementById('expired-popup').style.display = 'flex';
+        }
+
+        // Close Expired Popup
+        function closeExpiredPopup() {
+            document.getElementById('expired-popup').style.display = 'none';
+        }
+
+        // Show the page content after auth check passes
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.app-container').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

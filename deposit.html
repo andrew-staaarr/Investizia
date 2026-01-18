@@ -1,0 +1,1490 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - Investology Crypto</title>
+
+    <script>
+    // Protect all pages - redirect to login if not authenticated
+    if (!localStorage.getItem('currentUser')) {
+        window.location.href = 'index.html';
+    } else {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        // Optional: extra check (in case someone tampers with storage)
+        if (user.username !== "Rose2317") {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    }
+    </script>
+
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Toast for copy feedback -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    <style>
+        /* Premium Deposit Styles */
+        .deposit-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Balance Overview - Premium */
+        .deposit-balance {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-top: 4px solid #00d4aa;
+        }
+        
+        .balance-info {
+            margin-bottom: 20px;
+        }
+        
+        .balance-info .label {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .balance-info .amount {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4aa, #009688);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .vip-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .vip-label {
+            color: #fbbf24;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .vip-value {
+            color: #00d4aa;
+            font-weight: 700;
+            font-size: 1rem;
+            background: rgba(0, 212, 170, 0.1);
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+        
+        /* BTC Price Display */
+        .btc-price-display {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            animation: pulseBorder 3s infinite;
+        }
+        
+        @keyframes pulseBorder {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.2); }
+            50% { border-color: rgba(245, 158, 11, 0.4); }
+        }
+        
+        .btc-price-label {
+            color: #fbbf24;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .btc-price-value {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btc-min-equivalent {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        /* Deposit Methods - Premium Grid */
+        .deposit-methods {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #00d4aa;
+            border-radius: 2px;
+        }
+        
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .method-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(0, 212, 170, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .method-card:hover::before {
+            opacity: 1;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.15);
+        }
+        
+        .method-card.active {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: #00d4aa;
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.2);
+        }
+        
+        .method-card.active::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 22px;
+            height: 22px;
+            background: #00d4aa;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .method-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .method-card.disabled:hover {
+            transform: none;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+        
+        .method-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .method-card[data-method="bitcoin"] .method-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+        
+        .method-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .method-desc {
+            font-size: 0.85rem;
+            color: #a0aec0;
+        }
+        
+        /* Deposit Details - Premium */
+        .deposit-details {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.4s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .details-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .details-title span {
+            color: #00d4aa;
+            font-weight: 800;
+        }
+        
+        .qr-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (min-width: 768px) {
+            .qr-section {
+                grid-template-columns: 200px 1fr;
+            }
+        }
+        
+        .qr-code {
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 3px solid #00d4aa;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .qr-code {
+            border-color: #f59e0b;
+        }
+        
+        .qr-code img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+        
+        .wallet-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .wallet-info label {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .wallet-address {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 212, 170, 0.3);
+            border-radius: 12px;
+            padding: 18px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: white;
+            word-break: break-all;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .wallet-address {
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        
+        .wallet-address:hover {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: #00d4aa;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .wallet-address:hover {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+        
+        .btn-copy {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 16px 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            align-self: flex-start;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .btn-copy {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .btn-copy:hover {
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+        
+        /* Deposit Instructions */
+        .deposit-instructions {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .deposit-instructions h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .deposit-instructions h4::before {
+            content: '⚠️';
+            font-size: 1.2rem;
+        }
+        
+        .deposit-instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .deposit-instructions li {
+            color: #a0aec0;
+            margin-bottom: 10px;
+            padding-left: 24px;
+            position: relative;
+            line-height: 1.5;
+        }
+        
+        .deposit-instructions li::before {
+            content: '•';
+            color: #00d4aa;
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .deposit-instructions strong {
+            color: white;
+            font-weight: 700;
+        }
+        
+        /* Amount Input */
+        .deposit-amount-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+        }
+        
+        .deposit-amount-input label {
+            display: block;
+            color: #a0aec0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .deposit-input {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .deposit-input:focus {
+            outline: none;
+            border-color: #00d4aa;
+            background: rgba(0, 212, 170, 0.05);
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .deposit-input:focus {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+        
+        .btn-deposit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00d4aa 0%, #009688 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .btn-deposit {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .btn-deposit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.3);
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ .deposit-details .btn-deposit:hover {
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-deposit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* BTC Equivalent Display */
+        .btc-equivalent {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .btc-equivalent.active {
+            display: block;
+        }
+        
+        .btc-equivalent .label {
+            color: #fbbf24;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .btc-equivalent .value {
+            color: #fbbf24;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Recent Deposits */
+        .recent-deposits {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+        
+        .deposits-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .deposit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 18px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .deposit-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .deposit-date {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            min-width: 140px;
+        }
+        
+        .deposit-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .deposit-amount {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        
+        .deposit-amount.positive {
+            color: #00d4aa;
+        }
+        
+        .deposit-amount.negative {
+            color: #f87171;
+        }
+        
+        .deposit-method {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .status.completed {
+            background: rgba(0, 212, 170, 0.1);
+            color: #00d4aa;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+        
+        .status.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        /* Modal - Premium */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            animation: modalSlideIn 0.4s ease;
+            border-top: 4px solid #00d4aa;
+            position: relative;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ #confirmation-modal .modal-content {
+            border-top: 4px solid #f59e0b;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .modal-summary {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .summary-value.wallet {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00d4aa;
+            word-break: break-all;
+            text-align: right;
+            max-width: 250px;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ #confirmation-modal .summary-value.wallet {
+            color: #f59e0b;
+        }
+        
+        .modal-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-cancel, .btn-confirm {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-confirm {
+            background: linear-gradient(135deg, #00d4aa 0%, #009688 100%);
+            border: none;
+            color: white;
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ #confirmation-modal .btn-confirm {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+        }
+        
+        .method-card[data-method="bitcoin"].active ~ #confirmation-modal .btn-confirm:hover {
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+        
+        /* Success Modal */
+        .success-modal .modal-content {
+            border-top: 4px solid #00d4aa;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: #00d4aa;
+            margin-bottom: 20px;
+            animation: pulseSuccess 2s infinite;
+        }
+        
+        @keyframes pulseSuccess {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .success-message {
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #a0aec0;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 12px;
+        }
+        
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item.active {
+            color: #00d4aa;
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .nav-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes modalSlideIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .deposit-content {
+                padding: 15px;
+            }
+            
+            .methods-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .qr-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .qr-code {
+                align-self: center;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+            
+            .wallet-address {
+                font-size: 0.85rem;
+                padding: 14px;
+            }
+            
+            .modal-content {
+                padding: 25px 20px;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .deposit-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .deposit-date {
+                min-width: auto;
+            }
+            
+            .status {
+                align-self: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .balance-info .amount {
+                font-size: 1.8rem;
+            }
+            
+            .method-card {
+                padding: 15px;
+            }
+            
+            .deposit-details {
+                padding: 20px;
+            }
+            
+            .btc-price-value {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="window.history.back()">←</button>
+            </div>
+            <div class="header-center">Deposit</div>
+        </header>
+
+        <main class="deposit-content">
+            <!-- Balance Overview -->
+            <section class="deposit-balance glass-card">
+                <div class="balance-info">
+                    <span class="label">Available Balance</span>
+                    <div class="amount" id="balance-amount">2,660,222 USDT</div>
+                </div>
+                <div class="vip-info">
+                    <span class="vip-label">VIP4 Daily Deposit Limit</span>
+                    <span class="vip-value">Unlimited</span>
+                </div>
+            </section>
+
+            <!-- BTC Price Display -->
+            <div class="btc-price-display" id="btc-price-display">
+                <div class="btc-price-label">Current Bitcoin Price</div>
+                <div class="btc-price-value" id="btc-price">$95,207.00</div>
+                <div class="btc-min-equivalent">Minimum deposit: <span id="btc-min-btc">0.016</span> BTC ≈ $1,500 USDT</div>
+            </div>
+
+            <!-- Deposit Methods -->
+            <section class="deposit-methods">
+                <h2 class="section-title">Select Deposit Method</h2>
+                
+                <div class="methods-grid">
+                    <div class="method-card active" data-network="trc20" data-method="usdt">
+                        <div class="method-icon">USDT</div>
+                        <div class="method-name">USDT (TRC20)</div>
+                        <div class="method-desc">Tron Network • Low Fees</div>
+                    </div>
+
+                    <div class="method-card" data-network="btc" data-method="bitcoin">
+                        <div class="method-icon">₿</div>
+                        <div class="method-name">Bitcoin (BTC)</div>
+                        <div class="method-desc">Bitcoin Network • Secure</div>
+                    </div>
+
+                    <div class="method-card disabled">
+                        <div class="method-icon">💳</div>
+                        <div class="method-name">Bank Card</div>
+                        <div class="method-desc">Coming Soon</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deposit Details -->
+            <section class="deposit-details glass-card" id="deposit-details">
+                <h3 class="details-title">Deposit via <span id="selected-network">USDT (TRC20)</span></h3>
+
+                <div class="qr-section">
+                    <div class="qr-code">
+                        <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TYbNoqgjK4Zksqyo21nAsiYKzsB2aWJmbL" alt="Deposit QR Code">
+                    </div>
+                    <div class="wallet-info">
+                        <label>Wallet Address</label>
+                        <div class="wallet-address" id="wallet-address" onclick="copyWallet()">
+                            TYbNoqgjK4Zksqyo21nAsiYKzsB2aWJmbL
+                        </div>
+                        <button class="btn-copy" onclick="copyWallet()">
+                            <span style="font-size: 1.2rem;">📋</span> Copy Address
+                        </button>
+                    </div>
+                </div>
+
+                <div class="deposit-instructions">
+                    <h4>Important Instructions</h4>
+                    <ul>
+                        <li id="instruction-1">Send only <strong>USDT</strong> to this address on <strong>TRC20 network</strong></li>
+                        <li id="instruction-2">Minimum deposit: <strong>1,500 USDT</strong></li>
+                        <li id="instruction-3">Deposits are credited automatically within 5–10 minutes</li>
+                        <li>Do NOT send from exchange withdrawal address</li>
+                        <li>Wrong network = permanent loss of funds</li>
+                        <li>Do NOT send Less than 1,500 USDT equivalent</li>
+                    </ul>
+                </div>
+
+                <!-- USDT Equivalent Display for BTC -->
+                <div class="btc-equivalent" id="usdt-equivalent">
+                    <div class="label">USDT Equivalent (Approximate)</div>
+                    <div class="value" id="usdt-amount">0.00 USDT</div>
+                </div>
+
+                <div class="deposit-amount-input">
+                    <label>Expected Deposit Amount <span id="amount-currency">(USDT)</span></label>
+                    <input type="number" id="deposit-amount" placeholder="Enter amount" min="1500" step="0.01" class="deposit-input" oninput="validateAmount()">
+                    <p id="min-error" style="color: #f87171; font-size: 0.9rem; margin-top: -15px; margin-bottom: 15px; display: none;">
+                        <span id="min-error-text">Minimum deposit is 1,500 USDT</span>
+                    </p>
+                    <button class="btn-deposit" id="deposit-btn" onclick="showConfirmationModal()" disabled>I have sent the funds</button>
+                </div>
+            </section>
+
+            <!-- Recent Deposits -->
+            <section class="recent-deposits glass-card">
+                <h3 class="section-title">Recent Deposits</h3>
+                <div class="deposits-list">
+                    <div class="deposit-item">
+                        <div class="deposit-date">Jan 13, 2026 14:32</div>
+                        <div class="deposit-info">
+                            <span class="deposit-amount positive">+85,000.00 USDT</span>
+                            <span class="deposit-method">TRC20</span>
+                        </div>
+                        <span class="status completed">Completed</span>
+                    </div>
+                    <div class="deposit-item">
+                        <div class="deposit-date">Jan 11, 2026 09:15</div>
+                        <div class="deposit-info">
+                            <span class="deposit-amount positive">+1.52 BTC</span>
+                            <span class="deposit-method">BTC</span>
+                        </div>
+                        <span class="status completed">Completed</span>
+                    </div>
+                    <div class="deposit-item">
+                        <div class="deposit-date">Jan 10, 2026 16:45</div>
+                        <div class="deposit-info">
+                            <span class="deposit-amount positive">+200,000.00 USDT</span>
+                            <span class="deposit-method">TRC20</span>
+                        </div>
+                        <span class="status completed">Completed</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="trade.html" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Trade</span>
+            </a>
+            <a href="transfer.html" class="nav-item">
+                <span class="nav-icon">💸</span>
+                <span>Transfer</span>
+            </a>
+            <a href="account.html" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>My Account</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Deposit Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-card">
+            <h2 class="modal-title">Confirm Your Deposit</h2>
+            
+            <div class="modal-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Network</span>
+                    <span class="summary-value" id="modal-network">USDT (TRC20)</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Amount</span>
+                    <span class="summary-value" id="modal-amount">0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Wallet Address</span>
+                    <span class="summary-value wallet" id="modal-wallet">TYbNoqgjK4Zksqyo21nAsiYKzsB2aWJmbL</span>
+                </div>
+            </div>
+
+            <div class="modal-warning">
+                <strong>Warning:</strong> Please ensure you've sent the exact amount to the displayed address on the selected network. Wrong network or amount may result in permanent loss of funds.
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="confirmDeposit()">Yes, I Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal-overlay success-modal" style="display: none;">
+        <div class="modal-content glass-card">
+            <div class="success-icon">✅</div>
+            <h2 class="modal-title">Deposit Confirmed!</h2>
+            <p class="success-message">Your deposit confirmation has been submitted. Funds will be credited to your account within 5-10 minutes after system receives your payment.</p>
+            <div class="modal-actions">
+                <button class="btn-confirm" onclick="closeSuccessModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+    // Wallet addresses
+    const walletAddresses = {
+        usdt: {
+            address: "TYbNoqgjK4Zksqyo21nAsiYKzsB2aWJmbL",
+            network: "USDT (TRC20)",
+            qr: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TYbNoqgjK4Zksqyo21nAsiYKzsB2aWJmbL",
+            currency: "USDT",
+            minAmount: 1500
+        },
+        bitcoin: {
+            address: "bc1q80kd90frctf9kd6cymenftc6h767rvlw6gghms",
+            network: "Bitcoin (BTC)",
+            qr: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bc1q80kd90frctf9kd6cymenftc6h767rvlw6gghms",
+            currency: "BTC",
+            minAmount: 0.016 // Will be dynamically updated based on price
+        }
+    };
+
+    // Current BTC price (initial value)
+    let btcPrice = 95207; // USD price per BTC
+    const TARGET_MIN_USDT = 1500; // Always target $1,500 USDT minimum
+    let minBtcAmount = calculateMinBtcAmount(); // Dynamic minimum BTC
+
+    // Calculate minimum BTC based on current price to maintain $1,500 USDT value
+    function calculateMinBtcAmount() {
+        if (btcPrice <= 0) return 0.016; // Fallback if price is invalid
+        
+        // Calculate BTC needed for $1,500 USDT
+        let minBtc = TARGET_MIN_USDT / btcPrice;
+        
+        // Ensure minimum BTC is reasonable (not too high or low)
+        if (minBtc < 0.0001) minBtc = 0.0001; // Minimum sanity check
+        if (minBtc > 0.1) minBtc = 0.1; // Maximum sanity check
+        
+        return minBtc;
+    }
+
+    // Update wallet addresses with dynamic minimum
+    function updateBtcMinAmount() {
+        walletAddresses.bitcoin.minAmount = minBtcAmount;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        setupMethodCards();
+        validateAmount();
+        updateBTCPriceDisplay();
+        updateBtcMinAmount(); // Set initial dynamic minimum
+        fetchBTCPrice();
+    });
+
+    // Fetch live BTC price from CoinGecko
+    async function fetchBTCPrice() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+            const data = await response.json();
+            
+            if (data.bitcoin && data.bitcoin.usd) {
+                btcPrice = data.bitcoin.usd;
+                minBtcAmount = calculateMinBtcAmount(); // Recalculate minimum BTC
+                updateBtcMinAmount(); // Update in wallet addresses
+                updateBTCPriceDisplay();
+                validateAmount(); // Re-validate with new price
+            }
+        } catch (error) {
+            console.log('Using default BTC price:', btcPrice);
+            // Use default price if API fails
+            minBtcAmount = calculateMinBtcAmount();
+            updateBtcMinAmount();
+            updateBTCPriceDisplay();
+        }
+        
+        // Update price every 30 seconds
+        setTimeout(fetchBTCPrice, 30000);
+    }
+
+    // Update BTC price display
+    function updateBTCPriceDisplay() {
+        document.getElementById('btc-price').textContent = `$${btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('btc-min-btc').textContent = minBtcAmount.toFixed(4);
+        
+        // Update min BTC in USDT
+        const minUsdt = TARGET_MIN_USDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.querySelector('.btc-min-equivalent').innerHTML = 
+            `Minimum deposit: <span id="btc-min-btc">${minBtcAmount.toFixed(4)}</span> BTC ≈ $${minUsdt} USDT`;
+    }
+
+    // Setup method cards
+    function setupMethodCards() {
+        document.querySelectorAll('.method-card:not(.disabled)').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                
+                const method = this.dataset.method;
+                const network = this.dataset.network;
+                
+                updateDepositDetails(method, network);
+            });
+        });
+    }
+
+    // Update deposit details based on selected method
+    function updateDepositDetails(method, network) {
+        const details = walletAddresses[method];
+        if (!details) return;
+        
+        // Update network display
+        document.getElementById('selected-network').textContent = details.network;
+        
+        // Update wallet address
+        document.getElementById('wallet-address').textContent = details.address;
+        
+        // Update QR code
+        document.getElementById('qr-code-img').src = details.qr;
+        
+        // Update instructions
+        if (method === 'usdt') {
+            document.getElementById('instruction-1').innerHTML = 
+                `Send only <strong>USDT</strong> to this address on <strong>TRC20 network</strong>`;
+            document.getElementById('instruction-2').innerHTML = 
+                `Minimum deposit: <strong>1,500 USDT</strong>`;
+        } else {
+            document.getElementById('instruction-1').innerHTML = 
+                `Send only <strong>Bitcoin (BTC)</strong> to this address`;
+            document.getElementById('instruction-2').innerHTML = 
+                `Minimum deposit: <strong>${minBtcAmount.toFixed(4)} BTC</strong> (≈$${TARGET_MIN_USDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT)`;
+        }
+        
+        // Update currency display
+        const currencyDisplay = method === 'usdt' ? 'USDT' : 'BTC';
+        document.getElementById('amount-currency').textContent = `(${currencyDisplay})`;
+        
+        // Update input min, placeholder, and step
+        const input = document.getElementById('deposit-amount');
+        if (method === 'usdt') {
+            input.min = 1500;
+            input.step = '0.01';
+            input.placeholder = 'Enter amount in USDT';
+        } else {
+            input.min = minBtcAmount;
+            input.step = '0.00000001'; // 8 decimal places for BTC
+            input.placeholder = 'Enter amount in BTC';
+        }
+        
+        // Show/hide USDT equivalent for BTC
+        const usdtDisplay = document.getElementById('usdt-equivalent');
+        if (method === 'bitcoin') {
+            usdtDisplay.classList.add('active');
+            input.value = ''; // Clear input when switching
+        } else {
+            usdtDisplay.classList.remove('active');
+        }
+        
+        // Reset validation
+        validateAmount();
+    }
+
+    // Validate amount
+    function validateAmount() {
+        const input = document.getElementById('deposit-amount');
+        const amount = parseFloat(input.value) || 0;
+        const currentMethod = document.querySelector('.method-card.active').dataset.method;
+        const errorEl = document.getElementById('min-error');
+        const errorText = document.getElementById('min-error-text');
+        const button = document.getElementById('deposit-btn');
+        
+        let minAmount, isValid;
+        
+        if (currentMethod === 'usdt') {
+            minAmount = 1500;
+            isValid = amount >= minAmount;
+            errorText.textContent = `Minimum deposit is ${minAmount.toLocaleString()} USDT`;
+        } else {
+            minAmount = minBtcAmount;
+            isValid = amount >= minAmount;
+            const minUsdt = TARGET_MIN_USDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            errorText.textContent = `Minimum deposit is ${minAmount.toFixed(4)} BTC (≈$${minUsdt} USDT)`;
+            
+            // Update USDT equivalent
+            if (amount > 0) {
+                const usdtAmount = amount * btcPrice;
+                document.getElementById('usdt-amount').textContent = usdtAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDT';
+            } else {
+                document.getElementById('usdt-amount').textContent = '0.00 USDT';
+            }
+        }
+        
+        // Show error if below minimum
+        if (amount > 0 && !isValid) {
+            errorEl.style.display = 'block';
+            button.disabled = true;
+        } else {
+            errorEl.style.display = 'none';
+            button.disabled = amount === 0;
+        }
+        
+        // Update instruction 3 based on amount
+        if (currentMethod === 'usdt' && amount > 0) {
+            document.getElementById('instruction-3').innerHTML = 
+                `Send exactly <strong>${amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT</strong>`;
+        } else if (currentMethod === 'bitcoin' && amount > 0) {
+            const usdtAmount = amount * btcPrice;
+            document.getElementById('instruction-3').innerHTML = 
+                `Send exactly <strong>${amount.toFixed(8)} BTC</strong> (≈$${usdtAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT)`;
+        } else {
+            document.getElementById('instruction-3').innerHTML = 
+                `Deposits are credited automatically within 5–10 minutes`;
+        }
+    }
+
+    // Copy wallet address
+    function copyWallet() {
+        const address = document.getElementById('wallet-address').textContent;
+        navigator.clipboard.writeText(address).then(() => {
+            toastr.success('Wallet address copied to clipboard!', '', { 
+                timeOut: 2000,
+                positionClass: 'toast-top-center'
+            });
+        }).catch(() => {
+            toastr.error('Failed to copy address');
+        });
+    }
+
+    // Show confirmation modal
+    function showConfirmationModal() {
+        const amountInput = document.getElementById('deposit-amount');
+        const amount = parseFloat(amountInput.value) || 0;
+        const currentMethod = document.querySelector('.method-card.active').dataset.method;
+
+        // Get minimum amount based on method
+        const minAmount = currentMethod === 'usdt' ? 1500 : minBtcAmount;
+        
+        if (amount < minAmount) {
+            const minUsdt = currentMethod === 'usdt' ? '1,500 USDT' : `${minBtcAmount.toFixed(4)} BTC`;
+            toastr.warning(`Minimum deposit is ${minUsdt}`);
+            return;
+        }
+
+        // Get network and format amount display
+        const network = walletAddresses[currentMethod].network;
+        let amountDisplay;
+        
+        if (currentMethod === 'usdt') {
+            amountDisplay = `${amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT`;
+        } else {
+            const usdtAmount = amount * btcPrice;
+            amountDisplay = `${amount.toFixed(8)} BTC (≈$${usdtAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT)`;
+        }
+
+        // Fill modal data
+        document.getElementById('modal-network').textContent = network;
+        document.getElementById('modal-amount').textContent = amountDisplay;
+        document.getElementById('modal-wallet').textContent = document.getElementById('wallet-address').textContent;
+
+        // Show modal
+        document.getElementById('confirmation-modal').style.display = 'flex';
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById('confirmation-modal').style.display = 'none';
+    }
+
+    // Confirm deposit
+    function confirmDeposit() {
+        closeModal();
+        
+        // Show success modal
+        setTimeout(() => {
+            document.getElementById('success-modal').style.display = 'flex';
+        }, 300);
+        
+        // Add to recent deposits (simulated)
+        addToRecentDeposits();
+    }
+
+    // Close success modal
+    function closeSuccessModal() {
+        document.getElementById('success-modal').style.display = 'none';
+        // Reset form
+        document.getElementById('deposit-amount').value = '';
+        validateAmount();
+    }
+
+    // Add simulated recent deposit
+    function addToRecentDeposits() {
+        const amountInput = document.getElementById('deposit-amount');
+        const amount = parseFloat(amountInput.value) || 0;
+        const activeCard = document.querySelector('.method-card.active');
+        const method = activeCard.dataset.method;
+        const network = method === 'usdt' ? 'TRC20' : 'BTC';
+        
+        // Create date
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Format amount for display
+        let amountDisplay;
+        if (method === 'usdt') {
+            amountDisplay = `+${amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USDT`;
+        } else {
+            amountDisplay = `+${amount.toFixed(4)} BTC`;
+        }
+        
+        // Create new deposit item
+        const depositsList = document.querySelector('.deposits-list');
+        const newDeposit = document.createElement('div');
+        newDeposit.className = 'deposit-item';
+        newDeposit.innerHTML = `
+            <div class="deposit-date">${dateStr}</div>
+            <div class="deposit-info">
+                <span class="deposit-amount positive">${amountDisplay}</span>
+                <span class="deposit-method">${network}</span>
+            </div>
+            <span class="status pending">Pending</span>
+        `;
+        
+        // Add to top of list
+        depositsList.insertBefore(newDeposit, depositsList.firstChild);
+        
+        // Limit to 5 items
+        if (depositsList.children.length > 5) {
+            depositsList.removeChild(depositsList.lastChild);
+        }
+        
+        // Simulate status change after 2 minutes
+        setTimeout(() => {
+            newDeposit.querySelector('.status').className = 'status completed';
+            newDeposit.querySelector('.status').textContent = 'Completed';
+        }, 120000); // 2 minutes
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('confirmation-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    
+    document.getElementById('success-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeSuccessModal();
+    });
+
+    // Toast configuration
+    toastr.options = {
+        positionClass: 'toast-top-center',
+        progressBar: true,
+        timeOut: 3000,
+        closeButton: true,
+        newestOnTop: true
+    };
+</script>
+</body>
+    </html>

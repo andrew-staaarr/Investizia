@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investology - Dashboard</title>
+
+    <script>
+    // Protect all pages - redirect to login if not authenticated
+    if (!localStorage.getItem('currentUser')) {
+        window.location.href = 'index.html';
+    } else {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        // Optional: extra check (in case someone tampers with storage)
+        if (user.username !== "Rose2317") {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    }
+    </script>
+
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-particles"></div>
+
+    <div class="app-container">
+        <!-- Premium Header -->
+        <header class="app-header premium-header">
+            <div class="logo-glow-container">
+                <div class="logo-glow"></div>
+                <span class="platform-name">INV</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">N</div>
+                <span class="user-name">Rose2317</span>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="gradient-title">Next Generation Crypto Platform</h1>
+                <p class="hero-subtitle">Institutional-grade security • Lightning-fast execution • Maximum privacy</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <span class="stat-value">$1.8B+</span>
+                        <span class="stat-label">24h Volume</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">3.1M+</span>
+                        <span class="stat-label">Verified Users</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">99.99%</span>
+                        <span class="stat-label">Uptime SLA</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions – Premium Style -->
+        <section class="quick-actions premium-actions">
+            <div class="action-grid">
+                <a href="deposit.html" class="action-card premium-action">
+                    <div class="action-icon premium-icon">💰</div>
+                    <span>Deposit Funds</span>
+                </a>
+                <a href="withdraw.html" class="action-card premium-action">
+                    <div class="action-icon premium-icon">💸</div>
+                    <span>Withdraw Funds</span>
+                </a>
+                <a href="transfer.html" class="action-card premium-action">
+                    <div class="action-icon premium-icon">↔️</div>
+                    <span>Internal Transfer</span>
+                </a>
+                <a href="membership.html" class="action-card premium-action highlight-vip">
+                    <div class="action-icon premium-icon">✨</div>
+                    <span>Upgrade VIP</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Live Activity Section – Fully Responsive + Improved -->
+        <section class="live-activity-section">
+            <div class="section-header">
+                <div class="header-left">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        LIVE ACTIVITY
+                    </div>
+                    <h2>Recent Profits & Withdrawals</h2>
+                    </div>
+                <div class="header-right">
+                    <div class="stats-summary">
+                        <div class="summary-item">
+                            <span class="summary-value" id="today-profit">+$842.5K</span>
+                            <span class="summary-label">Today's Profit</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-value" id="today-withdrawals">$3.2M</span>
+                            <span class="summary-label">Today's Withdrawals</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-container">
+                <!-- Activity Tabs – Scrollable on mobile -->
+                <div class="activity-tabs">
+                    <button class="activity-tab active" data-tab="all">All Activity</button>
+                    <button class="activity-tab" data-tab="profits">Profits</button>
+                    <button class="activity-tab" data-tab="withdrawals">Withdrawals</button>
+                   <button class="activity-tab" data-tab="vip">VIP Members</button>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="activity-feed" id="activity-feed">
+                    <!-- Items generated dynamically -->
+                </div>
+
+                <!-- Activity Stats -->
+                <div class="activity-stats">
+                    <div class="stat-card-small">
+                        <div class="stat-icon profit-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">1,247</span>
+                            <span class="stat-text">Profits Today</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="stat-icon withdrawal-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">892</span>
+                            <span class="stat-text">Withdrawals Today</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="stat-icon user-icon"><i class="fas fa-user-check"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-number">56</span>
+                            <span class="stat-text">New VIPs Today</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Market – Professional Top 10 Coins -->
+        <section class="market-overview premium-market">
+            <div class="market-header">
+                <h2>Top 10 Live Cryptocurrencies</h2>
+                </div>
+
+            <div class="crypto-carousel">
+                <div class="crypto-card premium-crypto" id="btc-card">
+                    <div class="crypto-symbol">BTC/USDT</div>
+                    <div class="crypto-price" id="btc-price">Loading...</div>
+                    <div class="crypto-change" id="btc-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="eth-card">
+                    <div class="crypto-symbol">ETH/USDT</div>
+                    <div class="crypto-price" id="eth-price">Loading...</div>
+                    <div class="crypto-change" id="eth-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="bnb-card">
+                    <div class="crypto-symbol">BNB/USDT</div>
+                    <div class="crypto-price" id="bnb-price">Loading...</div>
+                    <div class="crypto-change" id="bnb-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="sol-card">
+                    <div class="crypto-symbol">SOL/USDT</div>
+                    <div class="crypto-price" id="sol-price">Loading...</div>
+                    <div class="crypto-change" id="sol-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="xrp-card">
+                    <div class="crypto-symbol">XRP/USDT</div>
+                    <div class="crypto-price" id="xrp-price">Loading...</div>
+                    <div class="crypto-change" id="xrp-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="ada-card">
+                    <div class="crypto-symbol">ADA/USDT</div>
+                    <div class="crypto-price" id="ada-price">Loading...</div>
+                    <div class="crypto-change" id="ada-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="doge-card">
+                    <div class="crypto-symbol">DOGE/USDT</div>
+                    <div class="crypto-price" id="doge-price">Loading...</div>
+                    <div class="crypto-change" id="doge-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="avax-card">
+                    <div class="crypto-symbol">AVAX/USDT</div>
+                    <div class="crypto-price" id="avax-price">Loading...</div>
+                    <div class="crypto-change" id="avax-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="shib-card">
+                    <div class="crypto-symbol">SHIB/USDT</div>
+                    <div class="crypto-price" id="shib-price">Loading...</div>
+                    <div class="crypto-change" id="shib-change">—</div>
+                </div>
+                <div class="crypto-card premium-crypto" id="link-card">
+                    <div class="crypto-symbol">LINK/USDT</div>
+                    <div class="crypto-price" id="link-price">Loading...</div>
+                    <div class="crypto-change" id="link-change">—</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav premium-nav">
+            <a href="home.html" class="nav-item active">
+                <span>Dashboard</span>
+            </a>
+            <a href="trade.html" class="nav-item">
+                <span>Trade</span>
+            </a>
+            <a href="transfer.html" class="nav-item">
+                <span>Transfer</span>
+            </a>
+            <a href="account.html" class="nav-item">
+                <span>Account</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Live Activity Styles – Fully Responsive + Fixed Alignment -->
+    <style>
+        .live-activity-section {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin: 1.2rem 1rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #f87171;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        .live-activity-section h2 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.3rem 0;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin: 0;
+            text-align: center;
+        }
+
+        .stats-summary {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-item {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            min-width: 130px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .summary-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #00d4aa;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+
+        .activity-container {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .activity-tabs {
+            display: flex;
+            overflow-x: auto;
+            background: rgba(30, 41, 59, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0 0.5rem;
+            scrollbar-width: none;
+        }
+
+        .activity-tabs::-webkit-scrollbar { display: none; }
+
+        .activity-tab {
+            background: none;
+            border: none;
+            color: #a0aec0;
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .activity-tab:hover { color: white; }
+
+        .activity-tab.active {
+            color: #00d4aa;
+            font-weight: 600;
+        }
+
+        .activity-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: #00d4aa;
+            border-radius: 3px;
+        }
+
+        .activity-feed {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .activity-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .profit-icon {
+            background: rgba(0, 212, 170, 0.1);
+            color: #00d4aa;
+        }
+
+        .withdrawal-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .vip-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .user-avatar-small {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .user-level {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+        }
+
+        .activity-amount {
+            font-weight: 700;
+            font-size: 1.05rem;
+            white-space: nowrap;
+        }
+
+        .activity-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #a0aec0;
+        }
+
+        .activity-description {
+            flex: 1;
+        }
+
+        .activity-time {
+            margin-left: 1rem;
+            white-space: nowrap;
+        }
+
+        .activity-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (min-width: 768px) {
+            .section-header {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                text-align: left;
+            }
+
+            .header-left {
+                text-align: left;
+            }
+
+            .live-activity-section h2,
+            .section-subtitle {
+                text-align: left;
+            }
+
+            .stats-summary {
+                margin-top: 0;
+            }
+
+            .activity-feed {
+                max-height: 420px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .live-activity-section {
+                padding: 1.2rem 1rem;
+                margin: 1rem 0.8rem;
+            }
+
+            .summary-value {
+                font-size: 1.2rem;
+            }
+
+            .summary-item {
+                min-width: 110px;
+                padding: 0.7rem;
+            }
+
+            .activity-tab {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+
+            .activity-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .activity-icon {
+                align-self: flex-start;
+            }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+
+    <!-- Live Activity Script – With Tab Filtering + Transaction-based Random Updates -->
+    <script>
+        const sampleUsers = [
+            { name: "Alex", initial: "A", level: "V4" },
+            { name: "John", initial: "J", level: "V3" },
+            { name: "Maria", initial: "M", level: "V2" },
+            { name: "David", initial: "D", level: "V4" },
+            { name: "Sarah", initial: "S", level: "V1" },
+            { name: "Michael", initial: "M", level: "V3" },
+            { name: "Emma", initial: "E", level: "V2" },
+            { name: "James", initial: "J", level: "V4" },
+            { name: "Lisa", initial: "L", level: "V1" },
+            { name: "Robert", initial: "R", level: "V3" },
+            { name: "Jennifer", initial: "J", level: "V2" },
+            { name: "Thomas", initial: "T", level: "V4" }
+        ];
+
+        const activityTypes = [
+            { type: "profit", icon: "fas fa-chart-line", descriptions: [
+                "made profit on BTC trade", "earned from ETH position", "gained from SOL trading"
+            ]},
+            { type: "withdrawal", icon: "fas fa-wallet", descriptions: [
+                "withdrew funds to bank", "withdrew USDT to external wallet"
+            ]},
+            { type: "vip", icon: "fas fa-crown", descriptions: [
+                "upgraded to VIP level", "joined VIP membership"
+            ]}
+        ];
+
+        function generateRandomAmount(type) {
+            if (type === "profit") return "$" + (Math.floor(Math.random() * 50000) + 100).toLocaleString();
+            if (type === "withdrawal") return "$" + (Math.floor(Math.random() * 100000) + 500).toLocaleString();
+            return "$" + (Math.floor(Math.random() * 10000) + 1000).toLocaleString();
+        }
+
+        function generateRandomTime() {
+            const minutes = Math.floor(Math.random() * 120) + 1;
+            return minutes < 60 ? `${minutes}m ago` : `${Math.floor(minutes/60)}h ago`;
+        }
+
+        function generateUsername(user) {
+            return user.name.substring(0, 3) + "***";
+        }
+
+        function createActivityItem() {
+            const user = sampleUsers[Math.floor(Math.random() * sampleUsers.length)];
+            const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+            const desc = type.descriptions[Math.floor(Math.random() * type.descriptions.length)];
+            const amount = generateRandomAmount(type.type);
+            const time = generateRandomTime();
+            return `
+                <div class="activity-item" data-type="${type.type}">
+                    <div class="activity-icon ${type.type}-icon">
+                        <i class="${type.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <div class="user-info">
+                                <div class="user-avatar-small">${user.initial}</div>
+                                <span class="username">${generateUsername(user)}</span>
+                                <span class="user-level">${user.level}</span>
+                            </div>
+                            <div class="activity-amount">${amount}</div>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-description">${desc}</div>
+                            <div class="activity-time">${time}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateInitialActivities(count = 8) {
+            const feed = document.getElementById('activity-feed');
+            feed.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                feed.innerHTML += createActivityItem();
+            }
+        }
+
+        function addNewActivity() {
+            document.getElementById('activity-feed').insertAdjacentHTML('afterbegin', createActivityItem());
+            if (document.getElementById('activity-feed').children.length > 10) {
+                document.getElementById('activity-feed').removeChild(document.getElementById('activity-feed').lastChild);
+            }
+        }
+
+        // NEW: Transaction-based stat updates
+        function updateStatsBasedOnActivity() {
+            const profitEl = document.getElementById('today-profit');
+            const withdrawEl = document.getElementById('today-withdrawals');
+            
+            // Get current values
+            let currentProfit = parseFloat(profitEl.textContent.replace(/[+$K]/g, '')) || 842.5;
+            let currentWithdraw = parseFloat(withdrawEl.textContent.replace(/[M]/g, '')) || 3.2;
+            
+            // Random chance to update (like real transactions)
+            const shouldUpdateProfit = Math.random() > 0.6; // 40% chance
+            const shouldUpdateWithdrawal = Math.random() > 0.7; // 30% chance
+            
+            // Small random amounts (like individual transactions)
+            if (shouldUpdateProfit) {
+                const profitIncrease = (Math.random() * 3 + 0.5); // $0.5K to $3.5K
+                currentProfit += profitIncrease;
+                profitEl.textContent = `+$${currentProfit.toFixed(1)}K`;
+            }
+            
+            if (shouldUpdateWithdrawal) {
+                const withdrawIncrease = (Math.random() * 150 + 30) / 1000; // $30K to $180K (in millions)
+                currentWithdraw += withdrawIncrease;
+                withdrawEl.textContent = `$${currentWithdraw.toFixed(2)}M`;
+            }
+        }
+
+        // NEW: Random interval for adding activities
+        function startRandomActivityUpdates() {
+            function addActivityWithRandomDelay() {
+                addNewActivity();
+                updateStatsBasedOnActivity(); // Update stats when new activity appears
+                
+                // Random delay between 3 to 15 seconds (like real transactions)
+                const nextDelay = Math.floor(Math.random() * 12000) + 3000;
+                setTimeout(addActivityWithRandomDelay, nextDelay);
+            }
+            
+            // Start the first update with random delay
+            const firstDelay = Math.floor(Math.random() * 5000) + 2000;
+            setTimeout(addActivityWithRandomDelay, firstDelay);
+        }
+
+        // Tab Switching
+        function setupTabs() {
+            document.querySelectorAll('.activity-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.activity-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const tabType = tab.dataset.tab;
+                    document.querySelectorAll('.activity-item').forEach(item => {
+                        const itemType = item.dataset.type;
+                        
+                        if (tabType === 'all' ||
+                            (tabType === 'profits' && itemType === 'profit') ||
+                            (tabType === 'withdrawals' && itemType === 'withdrawal') ||
+                            (tabType === 'vip' && itemType === 'vip')) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateInitialActivities(8);
+            setupTabs();
+            startRandomActivityUpdates(); // Use random timing instead of fixed interval
+        });
+    </script>
+
+    <!-- CoinPaprika Live Price Script (unchanged) -->
+    <script>
+        const coins = [
+            { id: 'btc-bitcoin', priceId: 'btc-price', changeId: 'btc-change', cardId: 'btc-card' },
+            { id: 'eth-ethereum', priceId: 'eth-price', changeId: 'eth-change', cardId: 'eth-card' },
+            { id: 'bnb-binance-coin', priceId: 'bnb-price', changeId: 'bnb-change', cardId: 'bnb-card' },
+            { id: 'sol-solana', priceId: 'sol-price', changeId: 'sol-change', cardId: 'sol-card' },
+            { id: 'xrp-xrp', priceId: 'xrp-price', changeId: 'xrp-change', cardId: 'xrp-card' },
+            { id: 'ada-cardano', priceId: 'ada-price', changeId: 'ada-change', cardId: 'ada-card' },
+            { id: 'doge-dogecoin', priceId: 'doge-price', changeId: 'doge-change', cardId: 'doge-card' },
+            { id: 'avax-avalanche', priceId: 'avax-price', changeId: 'avax-change', cardId: 'avax-card' },
+            { id: 'shib-shiba-inu', priceId: 'shib-price', changeId: 'shib-change', cardId: 'shib-card' },
+            { id: 'link-chainlink', priceId: 'link-price', changeId: 'link-change', cardId: 'link-card' }
+        ];
+
+        async function fetchCryptoPrices() {
+            try {
+                const response = await fetch('https://api.coinpaprika.com/v1/tickers');
+                const data = await response.json();
+                
+                coins.forEach(coin => {
+                    const coinData = data.find(c => c.id === coin.id);
+                    if (coinData) {
+                        const price = parseFloat(coinData.quotes.USD.price);
+                        const change = parseFloat(coinData.quotes.USD.percent_change_24h);
+                        
+                        const priceEl = document.getElementById(coin.priceId);
+                        const changeEl = document.getElementById(coin.changeId);
+                        const cardEl = document.getElementById(coin.cardId);
+                        
+                        priceEl.textContent = `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        
+                        if (change >= 0) {
+                            changeEl.textContent = `+${change.toFixed(2)}%`;
+                            changeEl.style.color = '#00d4aa';
+                            cardEl.style.borderLeft = '4px solid #00d4aa';
+                        } else {
+                            changeEl.textContent = `${change.toFixed(2)}%`;
+                            changeEl.style.color = '#f87171';
+                            cardEl.style.borderLeft = '4px solid #f87171';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error fetching prices, using fallback:', error);
+                // Fallback data if API fails
+                coins.forEach(coin => {
+                    const priceEl = document.getElementById(coin.priceId);
+                    const changeEl = document.getElementById(coin.changeId);
+                    const cardEl = document.getElementById(coin.cardId);
+                    
+                    const fakePrice = Math.random() * 50000 + 100;
+                    const fakeChange = (Math.random() * 10) - 5;
+                    
+                    priceEl.textContent = `$${fakePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    
+                    if (fakeChange >= 0) {
+                        changeEl.textContent = `+${fakeChange.toFixed(2)}%`;
+                        changeEl.style.color = '#00d4aa';
+                        cardEl.style.borderLeft = '4px solid #00d4aa';
+                    } else {
+                        changeEl.textContent = `${fakeChange.toFixed(2)}%`;
+                        changeEl.style.color = '#f87171';
+                        cardEl.style.borderLeft = '4px solid #f87171';
+                    }
+                });
+            }
+        }
+
+        // Fetch prices on load and every 30 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCryptoPrices();
+            setInterval(fetchCryptoPrices, 30000);
+        });
+    </script>
+</body>
+</html>

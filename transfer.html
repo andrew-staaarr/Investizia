@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Transfer - KBG Crypto</title>
+
+    <script>
+    // Protect all pages - redirect to login if not authenticated
+    if (!localStorage.getItem('currentUser')) {
+        window.location.href = 'index.html';
+    } else {
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        // Optional: extra check (in case someone tampers with storage)
+        if (user.username !== "Rose2317") {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    }
+    </script>
+
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="window.history.back()">←</button>
+            </div>
+            <div class="header-center">Internal Transfer</div>
+        </header>
+
+        <div class="transfer-container">
+            <div class="transfer-form">
+                <div class="form-row">
+                    <label>Balance</label>
+                    <span class="balance-text" id="transfer-balance">1460222.00 tether(USDT)</span>
+                </div>
+
+                <div class="form-row">
+                    <label>Account</label>
+                    <input type="text" placeholder="Recipient Must Be At Least Vip1" class="form-input">
+                </div>
+
+                <div class="form-row">
+                    <label>Quantity</label>
+                    <input type="number" placeholder="Please Enter Transfer Amount" class="form-input">
+                </div>
+
+                <button class="btn-transfer">Internal Transfer</button>
+
+                <p class="transfer-note">VIP Members Can Use One-click Transfer Without Key</p>
+
+                <div class="transfer-limits">
+                    <h3>Transfer and receiving limit (days)</h3>
+                    <div class="limit-list">
+                        <div class="limit-row">VIP1 (30000.00 USDT)</div>
+                        <div class="limit-row">VIP2 (100000.00 USDT)</div>
+                        <div class="limit-row">VIP3 (200000.00 USDT)</div>
+                        <div class="limit-row">VIP4 (2000000.00 USDT)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="transfer.js"></script>
+</body>
+</html>
