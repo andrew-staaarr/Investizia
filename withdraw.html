@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,6 +22,517 @@
     
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        /* TXID Input Styles */
+        .txid-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .txid-section.active {
+            display: block;
+        }
+        
+        .txid-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .txid-label span {
+            color: #f59e0b;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .txid-required {
+            color: #f87171 !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .txid-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .txid-input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .txid-help {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+        
+        .txid-help strong {
+            color: #fbbf24;
+        }
+        
+        /* Plan Info Box */
+        .plan-info-box {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .plan-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .plan-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .plan-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(0, 212, 170, 0.1);
+            color: #00d4aa;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+        
+        .status-expired {
+            background: rgba(220, 38, 38, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+        
+        .plan-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .plan-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .plan-detail-label {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        
+        .plan-detail-value {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .plan-detail-value.highlight {
+            color: #00d4aa;
+        }
+        
+        .plan-detail-value.warning {
+            color: #f59e0b;
+        }
+        
+        /* Success Message */
+        .success-message-box {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .success-icon-large {
+            font-size: 2.5rem;
+            color: #00d4aa;
+            margin-bottom: 15px;
+        }
+        
+        .success-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .success-details {
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        /* Admin Email Info */
+        .admin-email-info {
+            background: rgba(56, 178, 172, 0.1);
+            border: 1px solid rgba(56, 178, 172, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #a0aec0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .admin-email-info strong {
+            color: white;
+        }
+        
+        /* UPDATED: Confirmation Popup Styles - Mobile Responsive */
+        .confirmation-modal {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            max-width: 95%;
+            width: 95%;
+            margin: 0 auto;
+            border: 2px solid rgba(0, 212, 170, 0.3);
+        }
+        
+        .confirmation-header {
+            background: rgba(0, 212, 170, 0.1);
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .confirmation-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.3rem;
+        }
+        
+        .confirmation-details {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .detail-value {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            flex: 2;
+            text-align: right;
+            word-break: break-all;
+            max-width: 70%;
+        }
+        
+        @media (max-width: 480px) {
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .detail-value {
+                text-align: left;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .address-box, .txid-box {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                padding: 10px;
+                margin-top: 5px;
+                width: 100%;
+                font-family: 'Courier New', monospace;
+                font-size: 0.8rem;
+                line-height: 1.4;
+                word-break: break-all;
+            }
+        }
+        
+        .address-box, .txid-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        
+        .txid-box {
+            color: #a0aec0;
+        }
+        
+        .detail-value.highlight {
+            color: #00d4aa;
+            font-size: 1.1rem;
+        }
+        
+        .confirmation-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px;
+            color: #fbbf24;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        
+        .confirmation-actions {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .confirmation-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+        
+        .btn-cancel, .btn-confirm {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-cancel {
+            background: rgba(71, 85, 105, 0.7);
+            color: white;
+        }
+        
+        .btn-confirm {
+            background: linear-gradient(135deg, #00d4aa 0%, #009688 100%);
+            color: white;
+        }
+        
+        /* UPDATED: Processing Popup Styles */
+        .processing-popup {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 20px;
+            padding: 25px 20px;
+            max-width: 95%;
+            width: 95%;
+            margin: 0 auto;
+            text-align: center;
+            border: 2px solid rgba(0, 212, 170, 0.3);
+        }
+        
+        .processing-icon {
+            font-size: 3.5rem;
+            color: #00d4aa;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .processing-title {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .processing-message {
+            color: #a0aec0;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .processing-info-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .processing-info-title {
+            color: #fbbf24;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .processing-info-text {
+            color: #a0aec0;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .processing-close-btn {
+            background: linear-gradient(135deg, #00d4aa 0%, #009688 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .processing-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
+        }
+        
+        /* Activate Plan Button */
+        .activate-plan-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .activate-plan-btn {
+            background: linear-gradient(135deg, #00d4aa 0%, #009688 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .activate-plan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
+        }
+        
+        .activate-plan-btn .btn-icon {
+            font-size: 1.2rem;
+        }
+        
+        .activate-plan-instruction {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        
+        /* Request Accepted Popup */
+        .request-accepted-box {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .check-icon {
+            font-size: 3rem;
+            color: #00d4aa;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .processing-time {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .processing-time h4 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+        
+        .processing-time p {
+            color: #a0aec0;
+            margin: 5px 0;
+        }
+        
+        /* No Plan Message */
+        .no-plan-message {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        /* Disabled field styling */
+        .form-input:disabled {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .form-input:disabled::placeholder {
+            color: #64748b;
+        }
+    </style>
 </head>
 <body>
     <div class="background-particles"></div>
@@ -43,47 +553,111 @@
                     <div class="user-info">
                         <span class="greeting">Welcome back,</span>
                         <span class="username">Rose2317</span>
-                        <span class="vip-badge vip6 glowing-vip">VIP4</span>
+                        <span class="vip-badge vip6 glowing-vip" id="current-plan-badge">VIP0</span>
                     </div>
                 </div>
 
                 <div class="balance-display">
                     <div class="label">Available Balance</div>
-                    <div class="big-balance gradient-text">2,660,222.00 <span class="currency">USDT</span></div>
+                    <div class="big-balance gradient-text" id="available-balance">26,660,222.00 <span class="currency">USDT</span></div>
                 </div>
 
                 <div class="limits-row">
                     <div class="limit-box">
-                        <div class="limit-label">Vip4 Withdraw Limit</div>
-                        <div class="limit-value">4,000,000 USDT</div>
+                        <div class="limit-label">Withdraw Limit</div>
+                        <div class="limit-value" id="withdraw-limit">0 USDT</div>
                     </div>
                     <div class="limit-box">
-                        <div class="limit-label">Withdraw Limit Remaining</div>
-                        <div class="limit-value">2,850 USDT</div>
+                        <div class="limit-label">Remaining</div>
+                        <div class="limit-value" id="remaining-limit">0 USDT</div>
                     </div>
                 </div>
             </section>
 
+            <!-- Plan Information -->
+            <section class="plan-info-box">
+                <div class="plan-info-header">
+                    <div class="plan-name" id="current-plan-name">No Active Plan</div>
+                    <div class="plan-status status-inactive" id="plan-status">INACTIVE</div>
+                </div>
+                <div class="plan-details">
+                    <div class="plan-detail-item">
+                        <span class="plan-detail-label">Deposit Claimed</span>
+                        <span class="plan-detail-value" id="deposit-claimed">$0</span>
+                    </div>
+                    <div class="plan-detail-item">
+                        <span class="plan-detail-label">Withdraw Used</span>
+                        <span class="plan-detail-value warning" id="withdraw-used">$0</span>
+                    </div>
+                    <div class="plan-detail-item">
+                        <span class="plan-detail-label">Max Per Withdraw</span>
+                        <span class="plan-detail-value highlight" id="max-withdraw">$0</span>
+                    </div>
+                    <div class="plan-detail-item">
+                        <span class="plan-detail-label">Can Withdraw</span>
+                        <span class="plan-detail-value highlight" id="can-withdraw">$0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Activate Plan Section (Shows when no active plan) -->
+            <div class="activate-plan-section" id="activate-plan-section">
+                <button class="activate-plan-btn" onclick="goToMembership()">
+                    <span class="btn-icon">⚡</span> Activate Plan to Withdraw
+                </button>
+                <p class="activate-plan-instruction">
+                    You need an active plan to withdraw funds. Click above to activate your plan.
+                </p>
+            </div>
+
             <!-- Withdrawal Form – Premium Glass Panel -->
-            <section class="withdraw-interface premium-card glass-glow">
+            <section class="withdraw-interface premium-card glass-glow" id="withdraw-form-section">
                 <h2 class="gradient-title">Withdraw Funds</h2>
 
                 <div class="withdraw-form">
                     <div class="form-row">
-                        <label>Wallet Address</label>
-                        <input type="text" class="form-input premium-input" placeholder="Enter your wallet address" id="wallet-address" oninput="validateForm()" />
-                        <p class="instruction-note">Wallet address should be USDT on Tron network (USDT TRC20)</p>
-                        <p class="error-message" id="address-error" style="display: none; color: #f87171; font-size: 0.9rem; margin-top: 0.5rem;">
-                            Please enter a valid wallet address
+                        <label>Your Wallet Address (TRC20)</label>
+                        <input type="text" class="form-input premium-input" 
+                               placeholder="Enter your TRC20 wallet address" 
+                               id="wallet-address" 
+                               oninput="validateForm()" 
+                               onclick="checkPlanActiveForField('address')" />
+                        <p class="instruction-note">Enter your USDT (TRC20) wallet address to receive funds</p>
+                        <p class="error-message" id="address-error" style="display: none;">
+                            Please enter a valid TRC20 wallet address (starts with T)
                         </p>
                     </div>
 
                     <div class="form-row">
                         <label>Amount (USDT)</label>
-                        <input type="number" class="form-input premium-input" placeholder="0.00" id="withdraw-amount" min="0" step="0.01" oninput="calculateTotal(); validateForm()" />
-                        <p class="min-note">Minimum withdrawal: 5,000 USDT</p>
-                        <p class="error-message" id="amount-error" style="display: none; color: #f87171; font-size: 0.9rem; margin-top: 0.5rem;">
-                            Minimum withdrawal amount is 5,000 USDT
+                        <input type="number" class="form-input premium-input" 
+                               placeholder="0.00" 
+                               id="withdraw-amount" 
+                               min="10" 
+                               step="0.01" 
+                               oninput="validateForm(); updateMaxAmount()"
+                               onclick="checkPlanActiveForField('amount')" />
+                        <p class="min-note" id="amount-notes">Please upgrade your plan to withdraw funds</p>
+                        <div class="no-plan-message" id="upgrade-message" style="display: none;">
+                            ⚡ You need an active plan to withdraw. Click "Activate Plan to Withdraw" button above.
+                        </div>
+                        <p class="error-message" id="amount-error" style="display: none;"></p>
+                    </div>
+
+                    <!-- TXID Input Section -->
+                    <div class="txid-section" id="txid-section">
+                        <div class="txid-label">
+                            <span>Transaction ID (TXID) Required</span>
+                            <span class="txid-required">*Required for withdrawal</span>
+                        </div>
+                        <input type="text" class="txid-input" 
+                               placeholder="Enter your deposit transaction ID (TXID)" 
+                               id="txid-input" 
+                               oninput="validateForm()" />
+                        <p class="txid-help">
+                            <strong>Important:</strong> Enter the TXID from your deposit transaction. 
+                            This is required to verify your deposit and process withdrawal. 
+                            You can find TXID in your wallet transaction history.
                         </p>
                     </div>
 
@@ -93,37 +667,123 @@
                             <span>1.00 USDT</span>
                         </div>
                         <div class="fee-row total">
-                            <span>Total</span>
+                            <span>Total (Amount + Fee)</span>
                             <span class="total-value" id="total-amount">0.00 USDT</span>
                         </div>
                     </div>
 
-                    <button class="btn-withdraw premium-btn" id="withdraw-btn" disabled onclick="showConfirmWithdraw()">Withdraw Now</button>
+                    <div class="admin-email-info">
+                        <strong>Note:</strong> After submission, your withdrawal request will be sent to admin. 
+                        Payment will be processed manually within 5-30 minutes.
+                    </div>
+
+                    <button class="btn-withdraw premium-btn" 
+                            id="withdraw-btn" 
+                            onclick="showConfirmWithdraw()" 
+                            disabled>
+                        Proceed to Withdraw
+                    </button>
                 </div>
             </section>
 
-            <!-- Confirmation Popup -->
+            <!-- Success Message (Hidden by default) -->
+            <div class="success-message-box" id="success-message" style="display: none;">
+                <div class="success-icon-large">✅</div>
+                <h3 class="success-title">Withdrawal Request Submitted!</h3>
+                <p class="success-details">
+                    Your withdrawal request has been sent to admin for processing.<br>
+                    <strong>Amount:</strong> <span id="success-amount">$0</span><br>
+                    <strong>Wallet:</strong> <span id="success-wallet" style="font-family: 'Courier New', monospace; font-size: 0.9rem;"></span><br>
+                    Payment will be processed within 5-30 minutes.
+                </p>
+                <button class="btn-withdraw premium-btn" onclick="goToHome()">
+                    Return to Dashboard
+                </button>
+            </div>
+
+            <!-- UPDATED: Confirmation Popup -->
             <div id="confirm-withdraw-popup" class="modal-overlay" style="display: none;">
-                <div class="modal-content glass-glow">
-                    <button class="modal-close" onclick="closeConfirmWithdraw()">×</button>
-                    <h2 class="modal-title">Confirm Withdrawal</h2>
-                    <p class="modal-message">Are you sure you want to withdraw?</p>
-                    <div class="modal-actions">
+                <div class="modal-content confirmation-modal">
+                    <button class="modal-close" onclick="closeConfirmWithdraw()" style="position: absolute; right: 15px; top: 15px; z-index: 10; background: rgba(0,0,0,0.5); border: none; color: white; font-size: 1.5rem; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">×</button>
+                    
+                    <div class="confirmation-header">
+                        <h2>Confirm Withdrawal</h2>
+                    </div>
+                    
+                    <div class="confirmation-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Amount:</span>
+                            <span class="detail-value" id="confirm-amount">$0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Network Fee:</span>
+                            <span class="detail-value">$1.00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total:</span>
+                            <span class="detail-value highlight" id="confirm-total">$0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Wallet Address:</span>
+                            <div class="detail-value" id="confirm-wallet-container">
+                                <div class="address-box" id="confirm-wallet"></div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">TXID Provided:</span>
+                            <div class="detail-value" id="confirm-txid-container">
+                                <div class="txid-box" id="confirm-txid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="confirmation-warning">
+                        ⚠️ Please double-check all details. Request cannot be cancelled once submitted.
+                    </div>
+                    
+                    <div class="confirmation-actions">
                         <button class="btn-cancel" onclick="closeConfirmWithdraw()">Cancel</button>
-                        <button class="btn-confirm premium-btn" onclick="showExpiredError()">Confirm & Submit</button>
+                        <button class="btn-confirm" onclick="submitWithdrawal()">Confirm & Submit</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Expired Plan Error Popup (same as trade page) -->
-            <div id="expired-popup" class="modal-overlay" style="display: none;">
+            <!-- NEW: Processing Popup -->
+            <div id="processing-popup" class="modal-overlay" style="display: none;">
+                <div class="modal-content processing-popup">
+                    <div class="processing-icon">✅</div>
+                    <h2 class="processing-title">Transaction Submitted</h2>
+                    <p class="processing-message">
+                        Your withdrawal request has been successfully submitted.<br>
+                        System will verify your provided TXID and process your payment.
+                    </p>
+                    
+                    <div class="processing-info-box">
+                        <div class="processing-info-title">
+                            <span>⚠️</span>
+                            <span>Important Information</span>
+                        </div>
+                        <p class="processing-info-text">
+                            <strong>System will verify your Transaction ID (TXID) and send funds to your wallet within 5-15 minutes.</strong><br><br>
+                            Please check your wallet balance after 5-15 minutes. Ensure you have saved your TXID for future reference.
+                        </p>
+                    </div>
+                    
+                    <button class="processing-close-btn" onclick="closeProcessingPopup()">
+                        OK, Check Wallet Later
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plan Required Popup -->
+            <div id="plan-required-popup" class="modal-overlay" style="display: none;">
                 <div class="modal-content glass-glow">
-                    <button class="modal-close" onclick="closeExpiredPopup()">×</button>
-                    <h2 class="modal-title gradient-title">Plan Expired</h2>
-                    <p class="modal-message">Increase your plan first. Your current plan is expired.</p>
+                    <button class="modal-close" onclick="closePlanRequiredPopup()">×</button>
+                    <h2 class="modal-title gradient-title">Plan Required</h2>
+                    <p class="modal-message">You need an active plan to withdraw funds. Please activate your plan first.</p>
                     <div class="modal-actions">
-                        <button class="btn-upgrade premium-btn" onclick="window.location.href='membership.html'">Upgrade Plan</button>
-                        <button class="btn-cancel" onclick="closeExpiredPopup()">Close</button>
+                        <button class="btn-upgrade premium-btn" onclick="goToMembership()">Activate Plan</button>
+                        <button class="btn-cancel" onclick="closePlanRequiredPopup()">Close</button>
                     </div>
                 </div>
             </div>
@@ -146,83 +806,458 @@
         </main>
     </div>
 
-    <script>
-        const MIN_WITHDRAW = 5000;
-        const NETWORK_FEE = 1.00;
+    <!-- Toastr JS -->
+ <!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-        // Calculate Total & Validate Form
-        function calculateTotal() {
-            const amountInput = document.getElementById('withdraw-amount');
-            const totalEl = document.getElementById('total-amount');
-            const amountError = document.getElementById('amount-error');
-            const addressError = document.getElementById('address-error');
-            const withdrawBtn = document.getElementById('withdraw-btn');
+<script>
+    const NETWORK_FEE = 1.00;
+    const ADMIN_EMAIL = "admin@yourwebsite.com";
+    const FIXED_BALANCE = 26660222.00;
 
-            const amount = parseFloat(amountInput.value) || 0;
-            const total = amount + NETWORK_FEE;
+    // Get device ID
+    function getDeviceId() {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            const language = navigator.language;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            const browserInfo = userAgent + platform + language + timezone;
+            let hash = 0;
+            for (let i = 0; i < browserInfo.length; i++) {
+                const char = browserInfo.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            deviceId = 'device_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
+            localStorage.setItem('deviceId', deviceId);
+            localStorage.setItem('deviceId_timestamp', Date.now());
+        }
+        return deviceId;
+    }
 
-            totalEl.textContent = total.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }) + ' USDT';
+    // Get user data
+    function getUserData() {
+        const deviceId = getDeviceId();
+        const storedData = localStorage.getItem(`userData_${deviceId}`);
+        
+        if (!storedData) {
+            return {
+                deviceId: deviceId,
+                username: "Rose2317",
+                plan: "none",
+                status: "inactive",
+                depositClaimed: 0,
+                withdrawLimit: 0,
+                withdrawUsed: 0,
+                renewAvailable: false,
+                activated: false,
+                lastUpdated: Date.now()
+            };
+        }
+        return JSON.parse(storedData);
+    }
 
-            // Amount validation
-            if (amount > 0 && amount < MIN_WITHDRAW) {
+    // Save user data
+    function saveUserData(data) {
+        data.lastUpdated = Date.now();
+        localStorage.setItem(`userData_${data.deviceId}`, JSON.stringify(data));
+    }
+
+    // Plan wise max limits
+    const planLimits = {
+        v1: 30,
+        v2: 50000,
+        v3: 150000,
+        v4: 500000,
+        v5: 999999999
+    };
+
+    // Plan display names
+    const planNames = {
+        v1: "V1",
+        v2: "V2", 
+        v3: "V3",
+        v4: "V4",
+        v5: "V5 Premium"
+    };
+
+    // Initialize page
+    function initPage() {
+        const userData = getUserData();
+        
+        updateBalanceDisplay();
+        updatePlanInfo(userData);
+        toggleSections(userData);
+        updateMaxAmount();
+        validateForm();
+    }
+
+    // Toggle sections based on plan
+    function toggleSections(userData) {
+        const activateSection = document.getElementById('activate-plan-section');
+        const withdrawForm = document.getElementById('withdraw-form-section');
+        const amountInput = document.getElementById('withdraw-amount');
+        const addressInput = document.getElementById('wallet-address');
+        const amountNotes = document.getElementById('amount-notes');
+        const upgradeMessage = document.getElementById('upgrade-message');
+        
+        if (userData.activated && userData.status === "active") {
+            activateSection.style.display = 'none';
+            withdrawForm.style.display = 'block';
+            
+            amountInput.disabled = false;
+            addressInput.disabled = false;
+            amountNotes.style.display = 'block';
+            upgradeMessage.style.display = 'none';
+        } else {
+            activateSection.style.display = 'block';
+            withdrawForm.style.display = 'block';
+            
+            amountInput.disabled = true;
+            addressInput.disabled = true;
+            amountNotes.style.display = 'block';
+            amountNotes.innerHTML = 'Please upgrade your plan to withdraw funds';
+            upgradeMessage.style.display = 'block';
+        }
+    }
+
+    // Check if plan is active when clicking on input fields
+    function checkPlanActiveForField(fieldType) {
+        const userData = getUserData();
+        
+        if (!userData.activated || userData.status !== "active") {
+            document.getElementById('plan-required-popup').style.display = 'flex';
+            return false;
+        }
+        return true;
+    }
+
+    // Update balance display
+    function updateBalanceDisplay() {
+        const balanceElement = document.getElementById('available-balance');
+        balanceElement.textContent = FIXED_BALANCE.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " USDT";
+    }
+
+    // Update plan information
+    function updatePlanInfo(userData) {
+        const planBadge = document.getElementById('current-plan-badge');
+        const planName = document.getElementById('current-plan-name');
+        const planStatus = document.getElementById('plan-status');
+        const depositClaimed = document.getElementById('deposit-claimed');
+        const withdrawUsed = document.getElementById('withdraw-used');
+        const maxWithdraw = document.getElementById('max-withdraw');
+        const canWithdraw = document.getElementById('can-withdraw');
+        const withdrawLimit = document.getElementById('withdraw-limit');
+        const remainingLimit = document.getElementById('remaining-limit');
+        
+        if (userData.activated && userData.status === "active") {
+            planBadge.textContent = planNames[userData.plan];
+            planName.textContent = `${planNames[userData.plan]} Plan`;
+            planStatus.textContent = "ACTIVE";
+            planStatus.className = "plan-status status-active";
+            
+            depositClaimed.textContent = "$" + userData.depositClaimed.toLocaleString();
+            withdrawUsed.textContent = "$" + userData.withdrawUsed.toLocaleString();
+            
+            const maxAmount = planLimits[userData.plan];
+            maxWithdraw.textContent = "$" + maxAmount.toLocaleString();
+            
+            const remaining = userData.withdrawLimit - userData.withdrawUsed;
+            canWithdraw.textContent = "$" + Math.min(remaining, maxAmount).toLocaleString();
+            
+            withdrawLimit.textContent = "$" + userData.withdrawLimit.toLocaleString();
+            remainingLimit.textContent = "$" + remaining.toLocaleString();
+        } else {
+            planBadge.textContent = "VIP0";
+            planName.textContent = "No Active Plan";
+            planStatus.textContent = "INACTIVE";
+            planStatus.className = "plan-status status-expired";
+            
+            depositClaimed.textContent = "$0";
+            withdrawUsed.textContent = "$0";
+            maxWithdraw.textContent = "$0";
+            canWithdraw.textContent = "$0";
+            withdrawLimit.textContent = "$0";
+            remainingLimit.textContent = "$0";
+        }
+    }
+
+    // Update max amount for input
+    function updateMaxAmount() {
+        const userData = getUserData();
+        const amountInput = document.getElementById('withdraw-amount');
+        const amountNotes = document.getElementById('amount-notes');
+        
+        if (userData.activated && userData.status === "active") {
+            const maxAmount = Math.min(
+                planLimits[userData.plan],
+                userData.withdrawLimit - userData.withdrawUsed
+            );
+            
+            amountInput.max = maxAmount;
+            amountInput.disabled = false;
+            amountNotes.innerHTML = `Maximum withdrawal: <strong>$${maxAmount.toLocaleString()}</strong> | Minimum: $10`;
+        } else {
+            amountInput.max = 0;
+            amountInput.disabled = true;
+            amountNotes.innerHTML = `Please upgrade your plan to withdraw funds`;
+        }
+    }
+
+    // Calculate total
+    function calculateTotal() {
+        const amountInput = document.getElementById('withdraw-amount');
+        const totalElement = document.getElementById('total-amount');
+        
+        const amount = parseFloat(amountInput.value) || 0;
+        const total = amount + NETWORK_FEE;
+        
+        totalElement.textContent = total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' USDT';
+        
+        return total;
+    }
+
+    // Validate form
+    function validateForm() {
+        const userData = getUserData();
+        const amountInput = document.getElementById('withdraw-amount');
+        const addressInput = document.getElementById('wallet-address');
+        const txidInput = document.getElementById('txid-input');
+        const amountError = document.getElementById('amount-error');
+        const addressError = document.getElementById('address-error');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        const txidSection = document.getElementById('txid-section');
+        
+        const amount = parseFloat(amountInput.value) || 0;
+        const address = addressInput.value.trim();
+        
+        amountError.style.display = 'none';
+        addressError.style.display = 'none';
+        
+        let isValid = true;
+        let errorMessage = "";
+        
+        if (!userData.activated || userData.status !== "active") {
+            withdrawBtn.disabled = true;
+            withdrawBtn.innerHTML = "Activate Plan First";
+            return false;
+        }
+        
+        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+            withdrawBtn.disabled = true;
+            withdrawBtn.innerHTML = "Limit Exhausted - Renew Plan";
+            return false;
+        }
+        
+        if (amount > 0) {
+            txidSection.classList.add('active');
+        } else {
+            txidSection.classList.remove('active');
+        }
+        
+        if (amount > 0) {
+            const maxAmount = Math.min(
+                planLimits[userData.plan],
+                userData.withdrawLimit - userData.withdrawUsed
+            );
+            
+            if (amount < 10) {
+                isValid = false;
+                errorMessage = "Minimum withdrawal is $10";
+            } else if (amount > maxAmount) {
+                isValid = false;
+                errorMessage = `Maximum withdrawal is $${maxAmount.toLocaleString()}`;
+            } else if (amount > FIXED_BALANCE) {
+                isValid = false;
+                errorMessage = "Insufficient balance";
+            }
+            
+            if (!isValid) {
+                amountError.textContent = errorMessage;
                 amountError.style.display = 'block';
-            } else {
-                amountError.style.display = 'none';
             }
-
-            validateForm();
         }
-
-        // Form Validation (enable/disable button)
-        function validateForm() {
-            const amountInput = document.getElementById('withdraw-amount');
-            const addressInput = document.getElementById('wallet-address');
-            const amountError = document.getElementById('amount-error');
-            const addressError = document.getElementById('address-error');
-            const withdrawBtn = document.getElementById('withdraw-btn');
-
-            const amount = parseFloat(amountInput.value) || 0;
-            const address = addressInput.value.trim();
-
-            const isAmountValid = amount >= MIN_WITHDRAW;
-            const isAddressValid = address.length >= 10; // Basic check (you can improve regex later)
-
-            if (!isAddressValid && address.length > 0) {
+        
+        if (address.length > 0) {
+            if (!address.startsWith('T') || address.length < 20) {
                 addressError.style.display = 'block';
-            } else {
-                addressError.style.display = 'none';
+                isValid = false;
             }
-
-            // Enable button only if both are valid
-            withdrawBtn.disabled = !(isAmountValid && isAddressValid);
         }
-
-        // Confirm Withdrawal Popup
-        function showConfirmWithdraw() {
-            document.getElementById('confirm-withdraw-popup').style.display = 'flex';
+        
+        const txid = txidInput.value.trim();
+        if (amount > 0 && txid.length < 10) {
+            isValid = false;
         }
-
-        function closeConfirmWithdraw() {
-            document.getElementById('confirm-withdraw-popup').style.display = 'none';
+        
+        calculateTotal();
+        
+        if (isValid && amount > 0 && address.length > 0 && txid.length > 0) {
+            withdrawBtn.disabled = false;
+            withdrawBtn.innerHTML = "Proceed to Withdraw";
+        } else {
+            withdrawBtn.disabled = true;
+            withdrawBtn.innerHTML = "Proceed to Withdraw";
         }
+        
+        return isValid;
+    }
 
-        // Show Expired Error (same as trade page)
-        function showExpiredError() {
+    // Show confirm popup
+    function showConfirmWithdraw() {
+        const userData = getUserData();
+        
+        if (!userData.activated || userData.status !== "active") {
+            document.getElementById('plan-required-popup').style.display = 'flex';
+            return;
+        }
+        
+        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+            toastr.error("Withdrawal limit exhausted. Please renew your plan.");
+            return;
+        }
+        
+        if (!validateForm()) {
+            toastr.error("Please fill all required fields correctly.");
+            return;
+        }
+        
+        const amountInput = document.getElementById('withdraw-amount');
+        const addressInput = document.getElementById('wallet-address');
+        const txidInput = document.getElementById('txid-input');
+        
+        const amount = parseFloat(amountInput.value) || 0;
+        const total = amount + NETWORK_FEE;
+        
+        document.getElementById('confirm-amount').textContent = "$" + amount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('confirm-total').textContent = "$" + total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('confirm-wallet').textContent = addressInput.value;
+        document.getElementById('confirm-txid').textContent = txidInput.value;
+        
+        document.getElementById('confirm-withdraw-popup').style.display = 'flex';
+    }
+
+    // Close confirm popup
+    function closeConfirmWithdraw() {
+        document.getElementById('confirm-withdraw-popup').style.display = 'none';
+    }
+
+    // Close plan required popup
+    function closePlanRequiredPopup() {
+        document.getElementById('plan-required-popup').style.display = 'none';
+    }
+
+    // Close processing popup
+    function closeProcessingPopup() {
+        document.getElementById('processing-popup').style.display = 'none';
+        
+        // Clear form
+        document.getElementById('withdraw-amount').value = '';
+        document.getElementById('wallet-address').value = '';
+        document.getElementById('txid-input').value = '';
+        document.getElementById('txid-section').classList.remove('active');
+        
+        // Reset form validation
+        validateForm();
+    }
+
+    // FIXED: Submit withdrawal function
+    function submitWithdrawal() {
+        console.log("submitWithdrawal function called");
+        
+        const userData = getUserData();
+        const amountInput = document.getElementById('withdraw-amount');
+        const addressInput = document.getElementById('wallet-address');
+        const txidInput = document.getElementById('txid-input');
+        
+        const amount = parseFloat(amountInput.value) || 0;
+        const walletAddress = addressInput.value.trim();
+        const txid = txidInput.value.trim();
+        
+        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
             closeConfirmWithdraw();
-            document.getElementById('expired-popup').style.display = 'flex';
+            toastr.error("Withdrawal limit exhausted. Please renew your plan.");
+            return;
         }
-
-        function closeExpiredPopup() {
-            document.getElementById('expired-popup').style.display = 'none';
+        
+        // Update user data
+        userData.withdrawUsed += amount;
+        
+        if (userData.withdrawUsed >= userData.withdrawLimit && userData.plan !== "v5") {
+            userData.status = "expired";
+            userData.renewAvailable = true;
         }
+        
+        saveUserData(userData);
+        
+        // Close confirmation popup
+        closeConfirmWithdraw();
+        
+        // Show processing popup
+        setTimeout(function() {
+            document.getElementById('processing-popup').style.display = 'flex';
+            console.log("Processing popup shown");
+        }, 300);
+        
+        // Update display
+        initPage();
+        
+        // Show success message
+        toastr.success("Withdrawal submitted! Check wallet in 5-15 minutes.");
+    }
 
-        // Initial call to disable button on load
-        window.onload = function() {
-            validateForm();
-        };
-    </script>
+    // Navigation functions
+    function goToHome() {
+        window.location.href = 'home.html';
+    }
+
+    function goToMembership() {
+        window.location.href = 'membership.html';
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initPage();
+        
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+        
+        // Debug: Check if button onclick is properly set
+        const confirmButton = document.querySelector('.btn-confirm');
+        if (confirmButton) {
+            console.log("Confirm button found, onclick:", confirmButton.getAttribute('onclick'));
+        }
+    });
+
+    // Toast configuration
+    toastr.options = {
+        positionClass: 'toast-top-center',
+        progressBar: true,
+        timeOut: 3000,
+        closeButton: true,
+        newestOnTop: true
+    };
+</script>
 </body>
 </html>
